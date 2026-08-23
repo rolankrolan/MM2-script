@@ -1,2209 +1,1659 @@
-local allowedUsers = {
-    11508546883,
-   -- WHITELIST
+local _0x0000 = {
+11508546883,
 }
-
-local function checkWhitelist()
-    local id = game.Players.LocalPlayer.UserId
-    for _, allowedId in ipairs(allowedUsers) do
-        if id == allowedId then
-            return true
-        end
-    end
-    return false
+local function _0x0002()
+local _0x0003 = _0x0004._0x0005._0x0006._0x0007
+for _0x0008, _0x0009 in ipairs(_0x0000) do
+if _0x0003 == _0x0009 then
+return true
 end
-
-if not checkWhitelist() then
-    game.Players.LocalPlayer:Kick("Доступ запрещен. Тебя нет в вайтлисте!")
-    return
 end
-
--- ==========================================
--- GOD HUB | Murder Mystery 2 (Final Fix)
--- ==========================================
-
-local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
-
-local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
-
--- Удаляем старый гуй перед запуском
-if CoreGui:FindFirstChild("GodHubGui") then
-    CoreGui.GodHubGui:Destroy()
+return false
 end
-
--- ==========================================
--- 1. СОЗДАНИЕ ИНТЕРФЕЙСА (GUI)
--- ==========================================
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "GodHubGui"
-ScreenGui.Parent = CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
-MainFrame.Size = UDim2.new(0, 520, 0, 360)
-MainFrame.Active = true
-
-local UICornerMain = Instance.new("UICorner")
-UICornerMain.CornerRadius = UDim.new(0, 8)
-UICornerMain.Parent = MainFrame
-
--- Шапка
-local TopBar = Instance.new("Frame")
-TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-TopBar.BorderSizePixel = 0
-TopBar.Size = UDim2.new(1, 0, 0, 35)
-
-local UICornerTop = Instance.new("UICorner")
-UICornerTop.CornerRadius = UDim.new(0, 8)
-UICornerTop.Parent = TopBar
-
-local TopBarFix = Instance.new("Frame")
-TopBarFix.Parent = TopBar
-TopBarFix.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-TopBarFix.BorderSizePixel = 0
-TopBarFix.Position = UDim2.new(0, 0, 0.5, 0)
-TopBarFix.Size = UDim2.new(1, 0, 0.5, 0)
-
-local Title = Instance.new("TextLabel")
-Title.Parent = TopBar
-Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 12, 0, 0)
-Title.Size = UDim2.new(0, 200, 1, 0)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "God Hub | MM2"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
-Title.TextXAlignment = Enum.TextXAlignment.Left
-
--- Контейнер для кнопок управления в шапке (справа)
-local ButtonsContainer = Instance.new("Frame")
-ButtonsContainer.Parent = TopBar
-ButtonsContainer.BackgroundTransparency = 1
-ButtonsContainer.Position = UDim2.new(1, -110, 0, 0)
-ButtonsContainer.Size = UDim2.new(0, 110, 1, 0)
-
-local UIListLayoutBtns = Instance.new("UIListLayout")
-UIListLayoutBtns.Parent = ButtonsContainer
-UIListLayoutBtns.FillDirection = Enum.FillDirection.Horizontal
-UIListLayoutBtns.HorizontalAlignment = Enum.HorizontalAlignment.Right
-UIListLayoutBtns.SortOrder = Enum.SortOrder.LayoutOrder
-
--- 1. Кнопка сворачивания (-)
-local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Parent = ButtonsContainer
-MinimizeButton.BackgroundTransparency = 1
-MinimizeButton.Size = UDim2.new(0, 35, 1, 0)
-MinimizeButton.Font = Enum.Font.GothamBold
-MinimizeButton.Text = "-"
-MinimizeButton.TextColor3 = Color3.fromRGB(180, 180, 190)
-MinimizeButton.TextSize = 18
-
--- 2. Кнопка крестика с подтверждением (Выгрузка)
-local UnloadButton = Instance.new("TextButton")
-UnloadButton.Parent = ButtonsContainer
-UnloadButton.BackgroundTransparency = 1
-UnloadButton.Size = UDim2.new(0, 35, 1, 0)
-UnloadButton.Font = Enum.Font.GothamBold
-UnloadButton.Text = "X"
-UnloadButton.TextColor3 = Color3.fromRGB(255, 120, 120)
-UnloadButton.TextSize = 14
-
--- 3. Кнопка паники (Моментальное удаление)
-local PanicButton = Instance.new("TextButton")
-PanicButton.Parent = ButtonsContainer
-PanicButton.BackgroundTransparency = 1
-PanicButton.Size = UDim2.new(0, 35, 1, 0)
-PanicButton.Font = Enum.Font.GothamBold
-PanicButton.Text = "!"
-PanicButton.TextColor3 = Color3.fromRGB(255, 60, 60)
-PanicButton.TextSize = 14
-
--- ==========================================
--- ОКНО ПОДТВЕРЖДЕНИЯ ВЫГРУЗКИ
--- ==========================================
-local DialogOverlay = Instance.new("Frame")
-DialogOverlay.Parent = ScreenGui
-DialogOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-DialogOverlay.BackgroundTransparency = 0.5
-DialogOverlay.Size = UDim2.new(1, 0, 1, 0)
-DialogOverlay.Visible = false
-DialogOverlay.ZIndex = 10
-
-local DialogBox = Instance.new("Frame")
-DialogBox.Parent = DialogOverlay
-DialogBox.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
-DialogBox.Position = UDim2.new(0.5, -140, 0.5, -60)
-DialogBox.Size = UDim2.new(0, 280, 0, 120)
-DialogBox.ZIndex = 11
-
-local UICornerDialog = Instance.new("UICorner")
-UICornerDialog.CornerRadius = UDim.new(0, 8)
-UICornerDialog.Parent = DialogBox
-
-local DialogText = Instance.new("TextLabel")
-DialogText.Parent = DialogBox
-DialogText.BackgroundTransparency = 1
-DialogText.Position = UDim2.new(0, 10, 0, 15)
-DialogText.Size = UDim2.new(1, -20, 0, 40)
-DialogText.Font = Enum.Font.GothamMedium
-DialogText.Text = "Are you sure to Unload This Script?"
-DialogText.TextColor3 = Color3.fromRGB(255, 255, 255)
-DialogText.TextSize = 13
-DialogText.TextWrapped = true
-DialogText.ZIndex = 11
-
-local YesButton = Instance.new("TextButton")
-YesButton.Parent = DialogBox
-YesButton.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
-YesButton.Position = UDim2.new(0, 15, 1, -45)
-YesButton.Size = UDim2.new(0, 115, 0, 30)
-YesButton.Font = Enum.Font.GothamBold
-YesButton.Text = "Yes"
-YesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-YesButton.TextSize = 12
-YesButton.ZIndex = 11
-
-local UICornerYes = Instance.new("UICorner")
-UICornerYes.CornerRadius = UDim.new(0, 6)
-UICornerYes.Parent = YesButton
-
-local NoButton = Instance.new("TextButton")
-NoButton.Parent = DialogBox
-NoButton.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-NoButton.Position = UDim2.new(1, -130, 1, -45)
-NoButton.Size = UDim2.new(0, 115, 0, 30)
-NoButton.Font = Enum.Font.GothamBold
-NoButton.Text = "No"
-NoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoButton.TextSize = 12
-NoButton.ZIndex = 11
-
-local UICornerNo = Instance.new("UICorner")
-UICornerNo.CornerRadius = UDim.new(0, 6)
-UICornerNo.Parent = NoButton
-
-UnloadButton.MouseButton1Click:Connect(function() DialogOverlay.Visible = true end)
-NoButton.MouseButton1Click:Connect(function() DialogOverlay.Visible = false end)
-YesButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-PanicButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-
--- ==========================================
--- ИЗМЕНЕНИЕ РАЗМЕРА И ПЕРЕТАСКИВАНИЕ
--- ==========================================
-local ResizeButton = Instance.new("TextButton")
-ResizeButton.Parent = MainFrame
-ResizeButton.BackgroundTransparency = 1
-ResizeButton.Position = UDim2.new(1, -20, 1, -20)
-ResizeButton.Size = UDim2.new(0, 20, 0, 20)
-ResizeButton.Font = Enum.Font.GothamBold
-ResizeButton.Text = "◢"
-ResizeButton.TextColor3 = Color3.fromRGB(150, 150, 160)
-ResizeButton.TextSize = 14
-ResizeButton.ZIndex = 5
-
-local resizing = false
-local resizeStart, startSize
-
-ResizeButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing = true
-        resizeStart = input.Position
-        startSize = MainFrame.AbsoluteSize
-    end
-end)
-
-local dragging = false
-local dragStart, startPos
-
-TopBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-        resizing = false
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        if dragging then
-            local delta = input.Position - dragStart
-            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        elseif resizing then
-            local delta = input.Position - resizeStart
-            local newWidth = math.clamp(startSize.X + delta.X, 400, 800)
-            local newHeight = math.clamp(startSize.Y + delta.Y, 250, 600)
-            MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-        end
-    end
-end)
-
--- Боковая панель для вкладок
-local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Parent = MainFrame
-Sidebar.Active = true
-Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 37)
-Sidebar.BorderSizePixel = 0
-Sidebar.Position = UDim2.new(0, 0, 0, 35)
-Sidebar.Size = UDim2.new(0, 130, 1, -35)
-Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
-Sidebar.ScrollBarThickness = 2
-
-local UICornerSide = Instance.new("UICorner")
-UICornerSide.CornerRadius = UDim.new(0, 0, 0, 8)
-UICornerSide.Parent = Sidebar
-
-local UIListLayoutSide = Instance.new("UIListLayout")
-UIListLayoutSide.Parent = Sidebar
-UIListLayoutSide.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayoutSide.Padding = UDim.new(0, 5)
-
-local ContainerHolder = Instance.new("Folder")
-ContainerHolder.Parent = MainFrame
-
-local Tabs = {}
-local FirstTab = true
-
-local function CreateTab(name)
-    local TabContent = Instance.new("ScrollingFrame")
-    TabContent.Parent = ContainerHolder
-    TabContent.Active = true
-    TabContent.BackgroundTransparency = 1
-    TabContent.Position = UDim2.new(0, 140, 0, 45)
-    TabContent.Size = UDim2.new(1, -150, 1, -55)
-    TabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabContent.ScrollBarThickness = 4
-    TabContent.Visible = false
-
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Parent = TabContent
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 6)
-
-    local TabButton = Instance.new("TextButton")
-    TabButton.Parent = Sidebar
-    TabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
-    TabButton.BorderSizePixel = 0
-    TabButton.Size = UDim2.new(1, 0, 0, 35)
-    TabButton.Font = Enum.Font.GothamMedium
-    TabButton.Text = name
-    TabButton.TextColor3 = Color3.fromRGB(170, 170, 180)
-    TabButton.TextSize = 13
-
-    local UICornerBtn = Instance.new("UICorner")
-    UICornerBtn.CornerRadius = UDim.new(0, 6)
-    UICornerBtn.Parent = TabButton
-
-    TabButton.MouseButton1Click:Connect(function()
-        for _, tab in pairs(Tabs) do
-            tab.Content.Visible = false
-            tab.Button.TextColor3 = Color3.fromRGB(170, 170, 180)
-            tab.Button.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
-        end
-        TabContent.Visible = true
-        TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
-    end)
-
-    if FirstTab then
-        TabContent.Visible = true
-        TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
-        FirstTab = false
-    end
-
-    table.insert(Tabs, {Button = TabButton, Content = TabContent})
-    return TabContent
+if not _0x0002() then
+_0x0004._0x0005._0x0006:_0x000a(string.char(1044, 1086, 1089, 1090, 1091, 1087, 32, 1079, 1072, 1087, 1088, 1077, 1097, 1077, 1085, 46, 32, 1058, 1077, 1073, 1103, 32, 1085, 1077, 1090, 32, 1074, 32, 1074, 1072, 1081, 1090, 1083, 1080, 1089, 1090, 1077, 33))
+return
 end
-
--- Создаем вкладки
-local VisualTab = CreateTab("Визуал / ESP")
-local CombatTab = CreateTab("Бомбежка / AIM")
-local TeleportTab = CreateTab("Телепорты")
-local TrolTab = CreateTab("Троллинг")
-local Utilites = CreateTab("Утилиты")
-local Others = CreateTab("Другие")
-local Other = CreateTab("Другое")
-local Ability = CreateTab("Способности")
-local StatusTab = CreateTab("Статус")
-
-local function AddToggle(tab, text, callback)
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Parent = tab
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    ToggleBtn.BorderSizePixel = 0
-    ToggleBtn.Size = UDim2.new(1, -10, 0, 32)
-    ToggleBtn.Font = Enum.Font.GothamMedium
-    ToggleBtn.Text = "  " .. text .. ": [ ВЫКЛ ]"
-    ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 210)
-    ToggleBtn.TextSize = 12
-    ToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 6)
-    UICorner.Parent = ToggleBtn
-
-    local state = false
-    ToggleBtn.MouseButton1Click:Connect(function()
-        state = not state
-        if state then
-            ToggleBtn.Text = "  " .. text .. ": [ ВКЛ ]"
-            ToggleBtn.TextColor3 = Color3.fromRGB(80, 255, 120)
-        else
-            ToggleBtn.Text = "  " .. text .. ": [ ВЫКЛ ]"
-            ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 210)
-        end
-        pcall(function() callback(state) end)
-    end)
+local _0x0011 = _0x0004:_0x0012(string.char(67, 111, 114, 101, 71, 117, 105))
+local _0x0013 = _0x0004:_0x0012(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0014 = _0x0004:_0x0012(string.char(82, 117, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x0015 = _0x0004:_0x0012(string.char(87, 111, 114, 107, 115, 112, 97, 99, 101))
+local _0x0016 = _0x0004:_0x0012(string.char(84, 119, 101, 101, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x0006 = _0x0005._0x0006
+local _0x0017 = _0x0015._0x0018
+if _0x0011:_0x0019(string.char(71, 111, 100, 72, 117, 98, 71, 117, 105)) then
+_0x0011._0x001a:_0x001b()
 end
-
-local function AddButton(tab, text, callback)
-    local Btn = Instance.new("TextButton")
-    Btn.Parent = tab
-    Btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-    Btn.BorderSizePixel = 0
-    Btn.Size = UDim2.new(1, -10, 0, 32)
-    Btn.Font = Enum.Font.GothamMedium
-    Btn.Text = text
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.TextSize = 12
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 6)
-    UICorner.Parent = Btn
-
-    Btn.MouseButton1Click:Connect(function()
-        pcall(function() callback() end)
-    end)
+local _0x001d = _0x001e._0x001f(string.char(83, 99, 114, 101, 101, 110, 71, 117, 105))
+_0x001d._0x0020 = string.char(71, 111, 100, 72, 117, 98, 71, 117, 105)
+_0x001d._0x0021 = _0x0011
+_0x001d._0x0022 = _0x0023._0x0022._0x0024
+local _0x0025 = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x0025._0x0021 = _0x001d
+_0x0025._0x0026 = _0x0027._0x0028(25, 25, 30)
+_0x0025._0x0029 = 0
+_0x0025._0x002a = _0x002b._0x001f(0.5, -260, 0.5, -180)
+_0x0025._0x002c = _0x002b._0x001f(0, 520, 0, 360)
+_0x0025._0x002d = true
+local _0x002e = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x002e._0x002f = _0x0030._0x001f(0, 8)
+_0x002e._0x0021 = _0x0025
+local _0x0031 = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x0031._0x0021 = _0x0025
+_0x0031._0x0026 = _0x0027._0x0028(35, 35, 42)
+_0x0031._0x0029 = 0
+_0x0031._0x002c = _0x002b._0x001f(1, 0, 0, 35)
+local _0x0032 = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x0032._0x002f = _0x0030._0x001f(0, 8)
+_0x0032._0x0021 = _0x0031
+local _0x0033 = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x0033._0x0021 = _0x0031
+_0x0033._0x0026 = _0x0027._0x0028(35, 35, 42)
+_0x0033._0x0029 = 0
+_0x0033._0x002a = _0x002b._0x001f(0, 0, 0.5, 0)
+_0x0033._0x002c = _0x002b._0x001f(1, 0, 0.5, 0)
+local _0x0034 = _0x001e._0x001f(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
+_0x0034._0x0021 = _0x0031
+_0x0034._0x0035 = 1
+_0x0034._0x002a = _0x002b._0x001f(0, 12, 0, 0)
+_0x0034._0x002c = _0x002b._0x001f(0, 200, 1, 0)
+_0x0034._0x0036 = _0x0023._0x0036._0x0037
+_0x0034._0x0038 = string.char(71, 111, 100, 32, 72, 117, 98, 32, 124, 32, 77, 77, 50)
+_0x0034._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x0034._0x003a = 14
+_0x0034._0x003b = _0x0023._0x003b._0x003c
+local _0x003d = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x003d._0x0021 = _0x0031
+_0x003d._0x0035 = 1
+_0x003d._0x002a = _0x002b._0x001f(1, -110, 0, 0)
+_0x003d._0x002c = _0x002b._0x001f(0, 110, 1, 0)
+local _0x003e = _0x001e._0x001f(string.char(85, 73, 76, 105, 115, 116, 76, 97, 121, 111, 117, 116))
+_0x003e._0x0021 = _0x003d
+_0x003e._0x003f = _0x0023._0x003f._0x0040
+_0x003e._0x0041 = _0x0023._0x0041._0x0042
+_0x003e._0x0043 = _0x0023._0x0043._0x0044
+local _0x0045 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0045._0x0021 = _0x003d
+_0x0045._0x0035 = 1
+_0x0045._0x002c = _0x002b._0x001f(0, 35, 1, 0)
+_0x0045._0x0036 = _0x0023._0x0036._0x0037
+_0x0045._0x0038 = string.char(45)
+_0x0045._0x0039 = _0x0027._0x0028(180, 180, 190)
+_0x0045._0x003a = 18
+local _0x0046 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0046._0x0021 = _0x003d
+_0x0046._0x0035 = 1
+_0x0046._0x002c = _0x002b._0x001f(0, 35, 1, 0)
+_0x0046._0x0036 = _0x0023._0x0036._0x0037
+_0x0046._0x0038 = string.char(88)
+_0x0046._0x0039 = _0x0027._0x0028(255, 120, 120)
+_0x0046._0x003a = 14
+local _0x0047 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0047._0x0021 = _0x003d
+_0x0047._0x0035 = 1
+_0x0047._0x002c = _0x002b._0x001f(0, 35, 1, 0)
+_0x0047._0x0036 = _0x0023._0x0036._0x0037
+_0x0047._0x0038 = string.char(33)
+_0x0047._0x0039 = _0x0027._0x0028(255, 60, 60)
+_0x0047._0x003a = 14
+local _0x0048 = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x0048._0x0021 = _0x001d
+_0x0048._0x0026 = _0x0027._0x0028(0, 0, 0)
+_0x0048._0x0035 = 0.5
+_0x0048._0x002c = _0x002b._0x001f(1, 0, 1, 0)
+_0x0048._0x0049 = false
+_0x0048._0x004a = 10
+local _0x004b = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x004b._0x0021 = _0x0048
+_0x004b._0x0026 = _0x0027._0x0028(30, 30, 38)
+_0x004b._0x002a = _0x002b._0x001f(0.5, -140, 0.5, -60)
+_0x004b._0x002c = _0x002b._0x001f(0, 280, 0, 120)
+_0x004b._0x004a = 11
+local _0x004c = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x004c._0x002f = _0x0030._0x001f(0, 8)
+_0x004c._0x0021 = _0x004b
+local _0x004d = _0x001e._0x001f(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
+_0x004d._0x0021 = _0x004b
+_0x004d._0x0035 = 1
+_0x004d._0x002a = _0x002b._0x001f(0, 10, 0, 15)
+_0x004d._0x002c = _0x002b._0x001f(1, -20, 0, 40)
+_0x004d._0x0036 = _0x0023._0x0036._0x004e
+_0x004d._0x0038 = string.char(65, 114, 101, 32, 121, 111, 117, 32, 115, 117, 114, 101, 32, 116, 111, 32, 85, 110, 108, 111, 97, 100, 32, 84, 104, 105, 115, 32, 83, 99, 114, 105, 112, 116, 63)
+_0x004d._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x004d._0x003a = 13
+_0x004d._0x004f = true
+_0x004d._0x004a = 11
+local _0x0050 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0050._0x0021 = _0x004b
+_0x0050._0x0026 = _0x0027._0x0028(220, 60, 60)
+_0x0050._0x002a = _0x002b._0x001f(0, 15, 1, -45)
+_0x0050._0x002c = _0x002b._0x001f(0, 115, 0, 30)
+_0x0050._0x0036 = _0x0023._0x0036._0x0037
+_0x0050._0x0038 = string.char(89, 101, 115)
+_0x0050._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x0050._0x003a = 12
+_0x0050._0x004a = 11
+local _0x0051 = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x0051._0x002f = _0x0030._0x001f(0, 6)
+_0x0051._0x0021 = _0x0050
+local _0x0052 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0052._0x0021 = _0x004b
+_0x0052._0x0026 = _0x0027._0x0028(50, 50, 65)
+_0x0052._0x002a = _0x002b._0x001f(1, -130, 1, -45)
+_0x0052._0x002c = _0x002b._0x001f(0, 115, 0, 30)
+_0x0052._0x0036 = _0x0023._0x0036._0x0037
+_0x0052._0x0038 = string.char(78, 111)
+_0x0052._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x0052._0x003a = 12
+_0x0052._0x004a = 11
+local _0x0053 = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x0053._0x002f = _0x0030._0x001f(0, 6)
+_0x0053._0x0021 = _0x0052
+_0x0046._0x0054:_0x0055(function() _0x0048._0x0049 = true end)
+_0x0052._0x0054:_0x0055(function() _0x0048._0x0049 = false end)
+_0x0050._0x0054:_0x0055(function() _0x001d:_0x001b() end)
+_0x0047._0x0054:_0x0055(function() _0x001d:_0x001b() end)
+local _0x0056 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0056._0x0021 = _0x0025
+_0x0056._0x0035 = 1
+_0x0056._0x002a = _0x002b._0x001f(1, -20, 1, -20)
+_0x0056._0x002c = _0x002b._0x001f(0, 20, 0, 20)
+_0x0056._0x0036 = _0x0023._0x0036._0x0037
+_0x0056._0x0038 = string.char(9698)
+_0x0056._0x0039 = _0x0027._0x0028(150, 150, 160)
+_0x0056._0x003a = 14
+_0x0056._0x004a = 5
+local _0x0057 = false
+local _0x0058, _0x0059
+_0x0056._0x005a:_0x0055(function(_0x005b)
+if _0x005b._0x005c == _0x0023._0x005c._0x005d or _0x005b._0x005c == _0x0023._0x005c._0x005e then
+_0x0057 = true
+_0x0058 = _0x005b._0x002a
+_0x0059 = _0x0025._0x005f
 end
-
-local function AddSlider(tab, text, min, max, default, callback)
-    local Container = Instance.new("Frame")
-    Container.Parent = tab
-    Container.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    Container.BorderSizePixel = 0
-    Container.Size = UDim2.new(1, -10, 0, 50)
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 6)
-    UICorner.Parent = Container
-
-    local Label = Instance.new("TextLabel")
-    Label.Parent = Container
-    Label.BackgroundTransparency = 1
-    Label.Position = UDim2.new(0, 10, 0, 5)
-    Label.Size = UDim2.new(1, -20, 0, 20)
-    Label.Font = Enum.Font.GothamMedium
-    Label.Text = text .. ": " .. default
-    Label.TextColor3 = Color3.fromRGB(200, 200, 210)
-    Label.TextSize = 12
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-
-    local SliderBar = Instance.new("TextButton")
-    SliderBar.Parent = Container
-    SliderBar.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-    SliderBar.BorderSizePixel = 0
-    SliderBar.Position = UDim2.new(0, 10, 0, 30)
-    SliderBar.Size = UDim2.new(1, -20, 0, 10)
-    SliderBar.Text = ""
-
-    local UICornerBar = Instance.new("UICorner")
-    UICornerBar.CornerRadius = UDim.new(0, 4)
-    UICornerBar.Parent = SliderBar
-
-    local Fill = Instance.new("Frame")
-    Fill.Parent = SliderBar
-    Fill.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
-    Fill.BorderSizePixel = 0
-    Fill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0)
-
-    local UICornerFill = Instance.new("UICorner")
-    UICornerFill.CornerRadius = UDim.new(0, 4)
-    UICornerFill.Parent = Fill
-
-    local sliding = false
-    SliderBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            sliding = true
-        end
-    end)
-
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            sliding = false
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if sliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-            Fill.Size = UDim2.new(pos, 0, 1, 0)
-            local val = math.floor(min + (max - min) * pos)
-            Label.Text = text .. ": " .. val
-            pcall(function() callback(val) end)
-        end
-    end)
+end)
+local _0x0060 = false
+local _0x0061, _0x0062
+_0x0031._0x005a:_0x0055(function(_0x005b)
+if _0x005b._0x005c == _0x0023._0x005c._0x005d or _0x005b._0x005c == _0x0023._0x005c._0x005e then
+_0x0060 = true
+_0x0061 = _0x005b._0x002a
+_0x0062 = _0x0025._0x002a
 end
-
--- ==========================================
--- 2. ЛОГИКА ФУНКЦИЙ MM2
--- ==========================================
-
-local function GetRole(plr)
-    if not plr.Character then return "Innocent" end
-    local backpack = plr:FindFirstChild("Backpack")
-    local char = plr.Character
-    
-    if backpack and (backpack:FindFirstChild("Knife") or char:FindFirstChild("Knife")) then
-        return "Murderer"
-    elseif backpack and (backpack:FindFirstChild("Gun") or char:FindFirstChild("Gun")) then
-        return "Sheriff"
-    end
-    return "Innocent"
+end)
+_0x0013._0x0063:_0x0055(function(_0x005b)
+if _0x005b._0x005c == _0x0023._0x005c._0x005d or _0x005b._0x005c == _0x0023._0x005c._0x005e then
+_0x0060 = false
+_0x0057 = false
 end
-
--- 1. Role ESP
-local espEnabled = false
-RunService.RenderStepped:Connect(function()
-    if not espEnabled then return end
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local role = GetRole(plr)
-            local color = Color3.fromRGB(0, 255, 0)
-            if role == "Murderer" then color = Color3.fromRGB(255, 0, 0)
-            elseif role == "Sheriff" then color = Color3.fromRGB(0, 120, 255) end
-
-            local highlight = plr.Character:FindFirstChild("GodESP")
-            if not highlight then
-                highlight = Instance.new("Highlight")
-                highlight.Name = "GodESP"
-                highlight.Parent = plr.Character
-                highlight.Adornee = plr.Character
-                highlight.FillTransparency = 0.5
-                highlight.OutlineTransparency = 0
-            end
-            highlight.FillColor = color
-            highlight.OutlineColor = color
-        end
-    end
 end)
-
-AddToggle(VisualTab, "Role ESP (Инно/Шериф/Мардер)", function(state) espEnabled = state end)
-
--- ==========================================
--- 2. Items ESP (Ган — зеленый, Монетки — желтые)
--- ==========================================
-
-local itemsEspEnabled = false
-local trackedItems = {}
-
-local function addHighlightToItem(item)
-    if not item:FindFirstChild("ItemHighlight") then
-        local h = Instance.new("Highlight")
-        h.Name = "ItemHighlight"
-        h.Parent = item
-        
-        -- Проверяем, что это именно пистолет (GunDrop), и красим в зеленый
-        if item.Name == "GunDrop" then
-            h.FillColor = Color3.fromRGB(0, 255, 0)       -- Ярко-зеленый цвет внутри
-            h.OutlineColor = Color3.fromRGB(0, 180, 0)    -- Темно-зеленая обводка
-        else
-            -- Для монеток оставляем желтый
-            h.FillColor = Color3.fromRGB(255, 255, 0)
-            h.OutlineColor = Color3.fromRGB(255, 150, 0)
-        end
-        
-        table.insert(trackedItems, h)
-    end
+_0x0013._0x0064:_0x0055(function(_0x005b)
+if (_0x005b._0x005c == _0x0023._0x005c._0x0065 or _0x005b._0x005c == _0x0023._0x005c._0x005e) then
+if _0x0060 then
+local _0x0066 = _0x005b._0x002a - _0x0061
+_0x0025._0x002a = _0x002b._0x001f(_0x0062._0x0067._0x0068, _0x0062._0x0067._0x0069 + _0x0066._0x0067, _0x0062._0x006a._0x0068, _0x0062._0x006a._0x0069 + _0x0066._0x006a)
+elseif _0x0057 then
+local _0x0066 = _0x005b._0x002a - _0x0058
+local _0x006b = math._0x006c(_0x0059._0x0067 + _0x0066._0x0067, 400, 800)
+local _0x006d = math._0x006c(_0x0059._0x006a + _0x0066._0x006a, 250, 600)
+_0x0025._0x002c = _0x002b._0x001f(0, _0x006b, 0, _0x006d)
 end
-
-Workspace.DescendantAdded:Connect(function(obj)
-    if itemsEspEnabled and (obj.Name == "GunDrop" or obj.Name == "CoinContainer" or obj.Name == "CoinVisual") then
-        addHighlightToItem(obj)
-    end
-end)
-
-AddToggle(VisualTab, "Items ESP (Ган / Монетки)", function(state)
-    itemsEspEnabled = state
-    if state then
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj.Name == "GunDrop" or obj.Name == "CoinContainer" or obj.Name == "CoinVisual" then
-                addHighlightToItem(obj)
-            end
-        end
-    else
-        for _, h in pairs(trackedItems) do
-            if h and h.Parent then h:Destroy() end
-        end
-        trackedItems = {}
-    end
-end)
-
--- 3. Радужный префикс [GOD]
-local function CreateRainbowTag(char)
-    local head = char:WaitForChild("Head", 5)
-    if not head then return end
-
-    if head:FindFirstChild("GodTagGui") then
-        head.GodTagGui:Destroy()
-    end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "GodTagGui"
-    billboard.Parent = head
-    billboard.Adornee = head
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-    billboard.AlwaysOnTop = true
-
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Parent = billboard
-    textLabel.BackgroundTransparency = 1
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.Font = Enum.Font.GothamBold
-    textLabel.Text = "[GOD]"
-    textLabel.TextSize = 22
-    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-    task.spawn(function()
-        while billboard and billboard.Parent do
-            for i = 0, 1, 0.005 do
-                if not billboard or not billboard.Parent then break end
-                textLabel.TextColor3 = Color3.fromHSV(i, 1, 1)
-                task.wait(0.03)
-            end
-        end
-    end)
 end
-
-local function RemoveRainbowTag()
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChild("Head") and char.Head:FindFirstChild("GodTagGui") then
-        char.Head.GodTagGui:Destroy()
-    end
+end)
+local _0x006e = _0x001e._0x001f(string.char(83, 99, 114, 111, 108, 108, 105, 110, 103, 70, 114, 97, 109, 101))
+_0x006e._0x0021 = _0x0025
+_0x006e._0x002d = true
+_0x006e._0x0026 = _0x0027._0x0028(30, 30, 37)
+_0x006e._0x0029 = 0
+_0x006e._0x002a = _0x002b._0x001f(0, 0, 0, 35)
+_0x006e._0x002c = _0x002b._0x001f(0, 130, 1, -35)
+_0x006e._0x006f = _0x002b._0x001f(0, 0, 0, 0)
+_0x006e._0x0070 = 2
+local _0x0071 = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x0071._0x002f = _0x0030._0x001f(0, 0, 0, 8)
+_0x0071._0x0021 = _0x006e
+local _0x0072 = _0x001e._0x001f(string.char(85, 73, 76, 105, 115, 116, 76, 97, 121, 111, 117, 116))
+_0x0072._0x0021 = _0x006e
+_0x0072._0x0043 = _0x0023._0x0043._0x0044
+_0x0072._0x0073 = _0x0030._0x001f(0, 5)
+local _0x0074 = _0x001e._0x001f(string.char(70, 111, 108, 100, 101, 114))
+_0x0074._0x0021 = _0x0025
+local _0x0075 = {}
+local _0x0076 = true
+local function _0x0077(_0x0078)
+local _0x0079 = _0x001e._0x001f(string.char(83, 99, 114, 111, 108, 108, 105, 110, 103, 70, 114, 97, 109, 101))
+_0x0079._0x0021 = _0x0074
+_0x0079._0x002d = true
+_0x0079._0x0035 = 1
+_0x0079._0x002a = _0x002b._0x001f(0, 140, 0, 45)
+_0x0079._0x002c = _0x002b._0x001f(1, -150, 1, -55)
+_0x0079._0x006f = _0x002b._0x001f(0, 0, 0, 0)
+_0x0079._0x0070 = 4
+_0x0079._0x0049 = false
+local _0x007a = _0x001e._0x001f(string.char(85, 73, 76, 105, 115, 116, 76, 97, 121, 111, 117, 116))
+_0x007a._0x0021 = _0x0079
+_0x007a._0x0043 = _0x0023._0x0043._0x0044
+_0x007a._0x0073 = _0x0030._0x001f(0, 6)
+local _0x007b = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x007b._0x0021 = _0x006e
+_0x007b._0x0026 = _0x0027._0x0028(40, 40, 48)
+_0x007b._0x0029 = 0
+_0x007b._0x002c = _0x002b._0x001f(1, 0, 0, 35)
+_0x007b._0x0036 = _0x0023._0x0036._0x004e
+_0x007b._0x0038 = _0x0078
+_0x007b._0x0039 = _0x0027._0x0028(170, 170, 180)
+_0x007b._0x003a = 13
+local _0x007c = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x007c._0x002f = _0x0030._0x001f(0, 6)
+_0x007c._0x0021 = _0x007b
+_0x007b._0x0054:_0x0055(function()
+for _0x0008, _0x007d in pairs(_0x0075) do
+_0x007d._0x007e._0x0049 = false
+_0x007d._0x007f._0x0039 = _0x0027._0x0028(170, 170, 180)
+_0x007d._0x007f._0x0026 = _0x0027._0x0028(40, 40, 48)
 end
-
-local godTagEnabled = false
-LocalPlayer.CharacterAdded:Connect(function(newChar)
-    task.wait(1)
-    if godTagEnabled then
-        CreateRainbowTag(newChar)
-    end
+_0x0079._0x0049 = true
+_0x007b._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x007b._0x0026 = _0x0027._0x0028(60, 60, 75)
 end)
-
-AddToggle(VisualTab, "Радужный префикс [GOD] над вами", function(state)
-    godTagEnabled = state
-    local char = LocalPlayer.Character
-    if state then
-        if char then CreateRainbowTag(char) end
-    else
-        RemoveRainbowTag()
-    end
-end)
-
--- 4. WalkSpeed
-AddSlider(CombatTab, "WalkSpeed (Скорость)", 16, 200, 16, function(val)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = val
-    end
-end)
-
--- 5. Instant Kill (Мардер: ваншот с ножа)
-local instantKillEnabled = false
-AddToggle(CombatTab, "Instant Kill (Мардер: ваншот с ножа)", function(state)
-    instantKillEnabled = state
-    task.spawn(function()
-        while instantKillEnabled do
-            if GetRole(LocalPlayer) == "Murderer" and LocalPlayer.Character then
-                local knife = LocalPlayer.Character:FindFirstChild("Knife") or (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Knife"))
-                if knife then
-                    for _, plr in pairs(Players:GetPlayers()) do
-                        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                            local dist = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
-                            if dist < 15 then
-                                knife.Parent = LocalPlayer.Character
-                                pcall(function() knife:Activate() end)
-                            end
-                        end
-                    end
-                end
-            end
-            task.wait(0.1)
-        end
-    end)
-end)
-
--- 6. Instant Kill All
-local instantKillAllEnabled = false
-AddToggle(CombatTab, "Instant Kill All (Убить всех на карте)", function(state)
-    instantKillAllEnabled = state
-    task.spawn(function()
-        while instantKillAllEnabled do
-            if GetRole(LocalPlayer) == "Murderer" and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = LocalPlayer.Character.HumanoidRootPart
-                local knife = LocalPlayer.Character:FindFirstChild("Knife") or (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Knife"))
-                
-                if knife then
-                    knife.Parent = LocalPlayer.Character
-                    local originalPos = hrp.CFrame
-                    
-                    for _, plr in pairs(Players:GetPlayers()) do
-                        if not instantKillAllEnabled then break end
-                        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                            local targetHrp = plr.Character.HumanoidRootPart
-                            hrp.CFrame = targetHrp.CFrame + Vector3.new(0, 0, 2)
-                            pcall(function() knife:Activate() end)
-                            task.wait(0.05)
-                        end
-                    end
-                    
-                    hrp.CFrame = originalPos
-                end
-            end
-            task.wait(0.5)
-        end
-    end)
-end)
-
--- 7. Smart Aim
-local smartAimToggleState = false
-local smartAimActive = false
-
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp or not smartAimToggleState then return end
-    if input.KeyCode == Enum.KeyCode.R then smartAimActive = true end
-end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.R then smartAimActive = false end
-end)
-
-RunService.RenderStepped:Connect(function()
-    if smartAimToggleState and smartAimActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local myRole = GetRole(LocalPlayer)
-        local targetRole = (myRole == "Murderer") and "Sheriff" or "Murderer"
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and GetRole(plr) == targetRole and plr.Character and plr.Character:FindFirstChild("Head") then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, plr.Character.Head.Position)
-                break
-            end
-        end
-    end
-end)
-
-AddToggle(CombatTab, "Smart Aim (Зажать R на врага)", function(state) 
-    smartAimToggleState = state
-    if not state then smartAimActive = false end
-end)
-
--- 8. Fly
-local flying = false
-local flySpeed = 50
-AddToggle(CombatTab, "Fly (Полет)", function(state)
-    flying = state
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-    if flying then
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "GodFlyBV"
-        bv.Parent = hrp
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.Velocity = Vector3.new(0,0,0)
-        task.spawn(function()
-            while flying and char and hrp and hrp.Parent do
-                local cam = Workspace.CurrentCamera
-                local vel = Vector3.new(0,0,0)
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - cam.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + cam.CFrame.RightVector end
-                bv.Velocity = vel * flySpeed
-                task.wait()
-            end
-            if bv then bv:Destroy() end
-        end)
-    end
-end)
-
--- 9. Noclip & Infinite Jump
-local noclipEnabled = false
-RunService.Stepped:Connect(function()
-    if noclipEnabled and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
-        end
-    end
-end)
-AddToggle(CombatTab, "Noclip (Проход сквозь стены)", function(state) noclipEnabled = state end)
-
-local infJumpEnabled = false
-UserInputService.JumpRequest:Connect(function()
-    if infJumpEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-AddToggle(CombatTab, "Infinite Jump (Беск. прыжки)", function(state) infJumpEnabled = state end)
-
--- 10. Auto Farm Coins
-local autoFarmCoinsEnabled = false
-AddToggle(TeleportTab, "Auto Farm Coins (Плавный Tween фарм)", function(state)
-    autoFarmCoinsEnabled = state
-    task.spawn(function()
-        while autoFarmCoinsEnabled do
-            local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local coinFound = false
-                for _, obj in pairs(Workspace:GetDescendants()) do
-                    if not autoFarmCoinsEnabled then break end
-                    if obj.Name == "CoinVisual" or obj.Name == "Coin" or (obj.Name == "Base" and obj.Parent and obj.Parent.Name:match("Coin")) then
-                        local coinPart = obj:IsA("BasePart") and obj or (obj:FindFirstChild("Base") or obj:FindFirstChildOfClass("BasePart"))
-                        if coinPart then
-                            coinFound = true
-                            local distance = (hrp.Position - coinPart.Position).Magnitude
-                            local timeToTravel = math.clamp(distance / 45, 0.1, 1.5)
-                            local tweenInfo = TweenInfo.new(timeToTravel, Enum.EasingStyle.Linear)
-                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = coinPart.CFrame + Vector3.new(0, 2, 0)})
-                            tween:Play()
-                            tween.Completed:Wait()
-                            task.wait(0.05)
-                        end
-                    end
-                end
-                if not coinFound then
-                    task.wait(0.5)
-                end
-            else
-                task.wait(1)
-            end
-        end
-    end)
-end)
-
--- 11. Телепорт к упавшему гану (Исправленный поиск по имени и дочерним деталям)
-AddButton(TeleportTab, "ТП к упавшему Гану (Туда и назад)", function()
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-    local originalPos = hrp.CFrame
-
-    local foundGun = nil
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj.Name == "GunDrop" or obj.Name == "DroppedGun" or obj.Name == "Gun" then
-            if obj:IsA("Model") and obj.PrimaryPart then
-                foundGun = obj.PrimaryPart
-                break
-            elseif obj:FindFirstChild("Handle") then
-                foundGun = obj.Handle
-                break
-            elseif obj:IsA("BasePart") then
-                foundGun = obj
-                break
-            end
-        end
-    end
-
-    if foundGun then
-        hrp.CFrame = foundGun.CFrame + Vector3.new(0, 3, 0)
-        task.wait(0.15)
-        hrp.CFrame = originalPos
-    end
-end)
-
-AddButton(TeleportTab, "ТП к Шерифу", function()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if GetRole(plr) == "Sheriff" and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame
-        end
-    end
-end)
-
-AddButton(TeleportTab, "ТП к Ближайшему Инно", function()
-    local nearest, dist = nil, math.huge
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and GetRole(plr) == "Innocent" and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character then
-            local d = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
-            if d < dist then dist = d nearest = plr end
-        end
-    end
-    if nearest and nearest.Character then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = nearest.Character.HumanoidRootPart.CFrame
-    end
-end)
-
--- 12. View / Observer
-AddButton(TeleportTab, "Следить за Убийцей (View Murderer)", function()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if GetRole(plr) == "Murderer" and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            Camera.CameraSubject = plr.Character.Humanoid
-        end
-    end
-end)
-
-AddButton(TeleportTab, "Следить за Шерифом (View Sheriff)", function()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if GetRole(plr) == "Sheriff" and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            Camera.CameraSubject = plr.Character.Humanoid
-        end
-    end
-end)
-
-AddButton(TeleportTab, "Вернуть камеру на себя", function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        Camera.CameraSubject = LocalPlayer.Character.Humanoid
-    end
-end)
-
--- 13. Fling
-local function DoFling(targetPlr)
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-    local targetChar = targetPlr.Character
-    if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then return end
-    local targetHrp = targetChar.HumanoidRootPart
-
-    local bv = Instance.new("BodyVelocity")
-    bv.Name = "GodFling"
-    bv.Parent = hrp
-    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bv.Velocity = Vector3.new(99999, 99999, 99999)
-
-    local startTime = tick()
-    while tick() - startTime < 0.6 do
-        if targetHrp and hrp then hrp.CFrame = targetHrp.CFrame end
-        task.wait()
-    end
-    if bv then bv:Destroy() end
+if _0x0076 then
+_0x0079._0x0049 = true
+_0x007b._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x007b._0x0026 = _0x0027._0x0028(60, 60, 75)
+_0x0076 = false
 end
-
-AddButton(TrolTab, "Fling Убийцу", function()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if GetRole(plr) == "Murderer" then DoFling(plr) end
-    end
+table.insert(_0x0075, {_0x007f = _0x007b, _0x007e = _0x0079})
+return _0x0079
+end
+local _0x0080 = _0x0077(string.char(1042, 1080, 1079, 1091, 1072, 1083, 32, 47, 32, 69, 83, 80))
+local _0x0081 = _0x0077(string.char(1041, 1086, 1084, 1073, 1077, 1078, 1082, 1072, 32, 47, 32, 65, 73, 77))
+local _0x0082 = _0x0077(string.char(1058, 1077, 1083, 1077, 1087, 1086, 1088, 1090, 1099))
+local _0x0083 = _0x0077(string.char(1058, 1088, 1086, 1083, 1083, 1080, 1085, 1075))
+local _0x0084 = _0x0077(string.char(1059, 1090, 1080, 1083, 1080, 1090, 1099))
+local _0x0085 = _0x0077(string.char(1044, 1088, 1091, 1075, 1080, 1077))
+local _0x0086 = _0x0077(string.char(1044, 1088, 1091, 1075, 1086, 1077))
+local _0x0087 = _0x0077(string.char(1057, 1087, 1086, 1089, 1086, 1073, 1085, 1086, 1089, 1090, 1080))
+local _0x0088 = _0x0077(string.char(1057, 1090, 1072, 1090, 1091, 1089))
+local function _0x0089(_0x007d, _0x008a, _0x008b)
+local _0x008c = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x008c._0x0021 = _0x007d
+_0x008c._0x0026 = _0x0027._0x0028(35, 35, 45)
+_0x008c._0x0029 = 0
+_0x008c._0x002c = _0x002b._0x001f(1, -10, 0, 32)
+_0x008c._0x0036 = _0x0023._0x0036._0x004e
+_0x008c._0x0038 = string.char(32, 32) .. _0x008a .. string.char(58, 32, 91, 32, 1042, 1067, 1050, 1051, 32, 93)
+_0x008c._0x0039 = _0x0027._0x0028(200, 200, 210)
+_0x008c._0x003a = 12
+_0x008c._0x003b = _0x0023._0x003b._0x003c
+local _0x008d = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x008d._0x002f = _0x0030._0x001f(0, 6)
+_0x008d._0x0021 = _0x008c
+local _0x008e = false
+_0x008c._0x0054:_0x0055(function()
+_0x008e = not _0x008e
+if _0x008e then
+_0x008c._0x0038 = string.char(32, 32) .. _0x008a .. string.char(58, 32, 91, 32, 1042, 1050, 1051, 32, 93)
+_0x008c._0x0039 = _0x0027._0x0028(80, 255, 120)
+else
+_0x008c._0x0038 = string.char(32, 32) .. _0x008a .. string.char(58, 32, 91, 32, 1042, 1067, 1050, 1051, 32, 93)
+_0x008c._0x0039 = _0x0027._0x0028(200, 200, 210)
+end
+pcall(function() _0x008b(_0x008e) end)
 end)
-
-AddButton(TrolTab, "Fling Шерифа", function()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if GetRole(plr) == "Sheriff" then DoFling(plr) end
-    end
+end
+local function _0x008f(_0x007d, _0x008a, _0x008b)
+local _0x0090 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0090._0x0021 = _0x007d
+_0x0090._0x0026 = _0x0027._0x0028(45, 45, 55)
+_0x0090._0x0029 = 0
+_0x0090._0x002c = _0x002b._0x001f(1, -10, 0, 32)
+_0x0090._0x0036 = _0x0023._0x0036._0x004e
+_0x0090._0x0038 = _0x008a
+_0x0090._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x0090._0x003a = 12
+local _0x008d = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x008d._0x002f = _0x0030._0x001f(0, 6)
+_0x008d._0x0021 = _0x0090
+_0x0090._0x0054:_0x0055(function()
+pcall(function() _0x008b() end)
 end)
-
--- 14. Управление видимостью меню (Правый Ctrl + Кнопка '-')
-local isOpen = true
-MinimizeButton.MouseButton1Click:Connect(function()
-    isOpen = not isOpen
-    MainFrame.Visible = isOpen
+end
+local function _0x0091(_0x007d, _0x008a, min, max, _0x0092, _0x008b)
+local _0x0093 = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x0093._0x0021 = _0x007d
+_0x0093._0x0026 = _0x0027._0x0028(35, 35, 45)
+_0x0093._0x0029 = 0
+_0x0093._0x002c = _0x002b._0x001f(1, -10, 0, 50)
+local _0x008d = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x008d._0x002f = _0x0030._0x001f(0, 6)
+_0x008d._0x0021 = _0x0093
+local _0x0094 = _0x001e._0x001f(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
+_0x0094._0x0021 = _0x0093
+_0x0094._0x0035 = 1
+_0x0094._0x002a = _0x002b._0x001f(0, 10, 0, 5)
+_0x0094._0x002c = _0x002b._0x001f(1, -20, 0, 20)
+_0x0094._0x0036 = _0x0023._0x0036._0x004e
+_0x0094._0x0038 = _0x008a .. string.char(58, 32) .. _0x0092
+_0x0094._0x0039 = _0x0027._0x0028(200, 200, 210)
+_0x0094._0x003a = 12
+_0x0094._0x003b = _0x0023._0x003b._0x003c
+local _0x0095 = _0x001e._0x001f(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
+_0x0095._0x0021 = _0x0093
+_0x0095._0x0026 = _0x0027._0x0028(50, 50, 65)
+_0x0095._0x0029 = 0
+_0x0095._0x002a = _0x002b._0x001f(0, 10, 0, 30)
+_0x0095._0x002c = _0x002b._0x001f(1, -20, 0, 10)
+_0x0095._0x0038 = ""
+local _0x0096 = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x0096._0x002f = _0x0030._0x001f(0, 4)
+_0x0096._0x0021 = _0x0095
+local _0x0097 = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x0097._0x0021 = _0x0095
+_0x0097._0x0026 = _0x0027._0x0028(80, 150, 255)
+_0x0097._0x0029 = 0
+_0x0097._0x002c = _0x002b._0x001f((_0x0092 - min)/(max - min), 0, 1, 0)
+local _0x0098 = _0x001e._0x001f(string.char(85, 73, 67, 111, 114, 110, 101, 114))
+_0x0098._0x002f = _0x0030._0x001f(0, 4)
+_0x0098._0x0021 = _0x0097
+local _0x0099 = false
+_0x0095._0x005a:_0x0055(function(_0x005b)
+if _0x005b._0x005c == _0x0023._0x005c._0x005d or _0x005b._0x005c == _0x0023._0x005c._0x005e then
+_0x0099 = true
+end
 end)
-
-UserInputService.InputBegan:Connect(function(input, gp)
-    if not gp and (input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl) then
-        isOpen = not isOpen
-        MainFrame.Visible = isOpen
-    end
+_0x0013._0x0063:_0x0055(function(_0x005b)
+if _0x005b._0x005c == _0x0023._0x005c._0x005d or _0x005b._0x005c == _0x0023._0x005c._0x005e then
+_0x0099 = false
+end
 end)
-
--- ==========================================
--- УЛЬТИМАТИВНЫЙ АНТИ-ЛАГ AUTO GRAB
--- ==========================================
-
-AddToggle(TeleportTab, "Auto Grab Gun", function(state)
-    getgenv().autoGrabEnabled = state
+_0x0013._0x0064:_0x0055(function(_0x005b)
+if _0x0099 and (_0x005b._0x005c == _0x0023._0x005c._0x0065 or _0x005b._0x005c == _0x0023._0x005c._0x005e) then
+local _0x009a = math._0x006c((_0x005b._0x002a._0x0067 - _0x0095._0x009b._0x0067) / _0x0095._0x005f._0x0067, 0, 1)
+_0x0097._0x002c = _0x002b._0x001f(_0x009a, 0, 1, 0)
+local _0x009c = math.floor(min + (max - min) * _0x009a)
+_0x0094._0x0038 = _0x008a .. string.char(58, 32) .. _0x009c
+pcall(function() _0x008b(_0x009c) end)
+end
 end)
-
-local RunService = game:GetService("RunService")
-local lastCheck = 0
-
-RunService.Heartbeat:Connect(function()
-    if not getgenv().autoGrabEnabled then return end
-    
-    -- Проверяем ровно один раз в секунду, чтобы процессор вообще не напрягался
-    local now = os.clock()
-    if now - lastCheck < 1 then return end
-    lastCheck = now
-
-    local character = LocalPlayer.Character
-    local hrp = character and character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    -- Ищем только в Workspace
-    for _, obj in pairs(Workspace:GetChildren()) do
-        if obj.Name == "GunDrop" or obj.Name == "DroppedGun" then
-            local gunPart = nil
-            if obj:IsA("Model") and obj.PrimaryPart then
-                gunPart = obj.PrimaryPart
-            elseif obj:IsA("BasePart") then
-                gunPart = obj
-            end
-
-            if gunPart then
-                local oldCFrame = hrp.CFrame
-                hrp.CFrame = gunPart.CFrame
-                task.wait(0.05)
-                hrp.CFrame = oldCFrame
-                break
-            end
-        end
-    end
+end
+local function _0x009e(_0x009f)
+if not _0x009f._0x00a0 then return string.char(73, 110, 110, 111, 99, 101, 110, 116) end
+local _0x00a1 = _0x009f:_0x0019(string.char(66, 97, 99, 107, 112, 97, 99, 107))
+local char = _0x009f._0x00a0
+if _0x00a1 and (_0x00a1:_0x0019(string.char(75, 110, 105, 102, 101)) or char:_0x0019(string.char(75, 110, 105, 102, 101))) then
+return string.char(77, 117, 114, 100, 101, 114, 101, 114)
+elseif _0x00a1 and (_0x00a1:_0x0019(string.char(71, 117, 110)) or char:_0x0019(string.char(71, 117, 110))) then
+return string.char(83, 104, 101, 114, 105, 102, 102)
+end
+return string.char(73, 110, 110, 111, 99, 101, 110, 116)
+end
+local _0x00a4 = false
+_0x0014._0x00a5:_0x0055(function()
+if not _0x00a4 then return end
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00a7 = _0x009e(_0x009f)
+local _0x00a8 = _0x0027._0x0028(0, 255, 0)
+if _0x00a7 == string.char(77, 117, 114, 100, 101, 114, 101, 114) then _0x00a8 = _0x0027._0x0028(255, 0, 0)
+elseif _0x00a7 == string.char(83, 104, 101, 114, 105, 102, 102) then _0x00a8 = _0x0027._0x0028(0, 120, 255) end
+local _0x00a9 = _0x009f._0x00a0:_0x0019(string.char(71, 111, 100, 69, 83, 80))
+if not _0x00a9 then
+_0x00a9 = _0x001e._0x001f(string.char(72, 105, 103, 104, 108, 105, 103, 104, 116))
+_0x00a9._0x0020 = string.char(71, 111, 100, 69, 83, 80)
+_0x00a9._0x0021 = _0x009f._0x00a0
+_0x00a9._0x00aa = _0x009f._0x00a0
+_0x00a9._0x00ab = 0.5
+_0x00a9._0x00ac = 0
+end
+_0x00a9._0x00ad = _0x00a8
+_0x00a9._0x00ae = _0x00a8
+end
+end
 end)
-
--- ==========================================
--- КАСТОМНЫЙ СКЕЙБОКС (КАК ТЫ СКАЗАЛ)
--- ==========================================
-
-AddToggle(VisualTab, "Epic Space Sky", function(state)
-    local Lighting = game:GetService("Lighting")
-    local skyObj = Lighting:FindFirstChildOfClass("Sky")
-    
-    if state then
-        if not skyObj then
-            skyObj = Instance.new("Sky")
-            skyObj.Parent = Lighting
-        end
-        
-        -- Сохраняем старые текстуры на всякий случай
-        getgenv().oldSkyBk = skyObj.SkyboxBk
-        getgenv().oldSkyDn = skyObj.SkyboxDn
-        getgenv().oldSkyFt = skyObj.SkyboxFt
-        getgenv().oldSkyLf = skyObj.SkyboxLf
-        getgenv().oldSkyRt = skyObj.SkyboxRt
-        getgenv().oldSkyUp = skyObj.SkyboxUp
-        
-        -- Применяем твои ID: Верх отдельно, всё остальное — во второй ID
-        local upID = "rbxassetid://6841833249"
-        local sideID = "rbxassetid://89484035583483"
-        
-        skyObj.SkyboxUp = upID
-        
-        skyObj.SkyboxBk = sideID
-        skyObj.SkyboxDn = sideID
-        skyObj.SkyboxFt = sideID
-        skyObj.SkyboxLf = sideID
-        skyObj.SkyboxRt = sideID
-        
-        skyObj.StarCount = 5000
-        
-        getgenv().originalAmbient = Lighting.Ambient
-        Lighting.Ambient = Color3.fromRGB(30, 30, 50)
-    else
-        -- Возвращаем всё назад при выключении
-        if skyObj then
-            skyObj.SkyboxBk = getgenv().oldSkyBk or ""
-            skyObj.SkyboxDn = getgenv().oldSkyDn or ""
-            skyObj.SkyboxFt = getgenv().oldSkyFt or ""
-            skyObj.SkyboxLf = getgenv().oldSkyLf or ""
-            skyObj.SkyboxRt = getgenv().oldSkyRt or ""
-            skyObj.SkyboxUp = getgenv().oldSkyUp or ""
-            skyObj.StarCount = 3000
-        end
-        
-        if getgenv().originalAmbient then
-            Lighting.Ambient = getgenv().originalAmbient
-        end
-    end
+_0x0089(_0x0080, string.char(82, 111, 108, 101, 32, 69, 83, 80, 32, 40, 1048, 1085, 1085, 1086, 47, 1064, 1077, 1088, 1080, 1092, 47, 1052, 1072, 1088, 1076, 1077, 1088, 41), function(_0x008e) _0x00a4 = _0x008e end)
+local _0x00b0 = false
+local _0x00b1 = {}
+local function _0x00b2(_0x00b3)
+if not _0x00b3:_0x0019(string.char(73, 116, 101, 109, 72, 105, 103, 104, 108, 105, 103, 104, 116)) then
+local _0x00b4 = _0x001e._0x001f(string.char(72, 105, 103, 104, 108, 105, 103, 104, 116))
+_0x00b4._0x0020 = string.char(73, 116, 101, 109, 72, 105, 103, 104, 108, 105, 103, 104, 116)
+_0x00b4._0x0021 = _0x00b3
+if _0x00b3._0x0020 == string.char(71, 117, 110, 68, 114, 111, 112) then
+_0x00b4._0x00ad = _0x0027._0x0028(0, 255, 0)
+_0x00b4._0x00ae = _0x0027._0x0028(0, 180, 0)
+else
+_0x00b4._0x00ad = _0x0027._0x0028(255, 255, 0)
+_0x00b4._0x00ae = _0x0027._0x0028(255, 150, 0)
+end
+table.insert(_0x00b1, _0x00b4)
+end
+end
+_0x0015._0x00b6:_0x0055(function(_0x00b7)
+if _0x00b0 and (_0x00b7._0x0020 == string.char(71, 117, 110, 68, 114, 111, 112) or _0x00b7._0x0020 == string.char(67, 111, 105, 110, 67, 111, 110, 116, 97, 105, 110, 101, 114) or _0x00b7._0x0020 == string.char(67, 111, 105, 110, 86, 105, 115, 117, 97, 108)) then
+_0x00b2(_0x00b7)
+end
 end)
-
--- 2. FULLBRIGHT (Анти-темнота)
-AddToggle(VisualTab, "Fullbright", function(state)
-    local Lighting = game:GetService("Lighting")
-    
-    if state then
-        getgenv().originalLighting = {
-            Brightness = Lighting.Brightness,
-            ClockTime = Lighting.ClockTime,
-            FogEnd = Lighting.FogEnd,
-            GlobalShadows = Lighting.GlobalShadows,
-            OutdoorAmbient = Lighting.OutdoorAmbient
-        }
-        
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.FogEnd = 100000
-        Lighting.GlobalShadows = false
-        Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
-    else
-        if getgenv().originalLighting then
-            local orig = getgenv().originalLighting
-            Lighting.Brightness = orig.Brightness
-            Lighting.ClockTime = orig.ClockTime
-            Lighting.FogEnd = orig.FogEnd
-            Lighting.GlobalShadows = orig.GlobalShadows
-            Lighting.OutdoorAmbient = orig.OutdoorAmbient
-        end
-    end
+_0x0089(_0x0080, string.char(73, 116, 101, 109, 115, 32, 69, 83, 80, 32, 40, 1043, 1072, 1085, 32, 47, 32, 1052, 1086, 1085, 1077, 1090, 1082, 1080, 41), function(_0x008e)
+_0x00b0 = _0x008e
+if _0x008e then
+for _0x0008, _0x00b7 in pairs(_0x0015:_0x00b8()) do
+if _0x00b7._0x0020 == string.char(71, 117, 110, 68, 114, 111, 112) or _0x00b7._0x0020 == string.char(67, 111, 105, 110, 67, 111, 110, 116, 97, 105, 110, 101, 114) or _0x00b7._0x0020 == string.char(67, 111, 105, 110, 86, 105, 115, 117, 97, 108) then
+_0x00b2(_0x00b7)
+end
+end
+else
+for _0x0008, _0x00b4 in pairs(_0x00b1) do
+if _0x00b4 and _0x00b4._0x0021 then _0x00b4:_0x001b() end
+end
+_0x00b1 = {}
+end
 end)
-
--- ==========================================
--- УПРАВЛЯЕМЫЙ DASH НА 'Q'
--- ==========================================
-
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-
-local player = Players.LocalPlayer
-local dashEnabled = false
-local dashDistance = 15 
-local dashTime = 0.15
-
--- Тумблер: при выключении принудительно ставим dashEnabled = false
-AddToggle(Utilites, "Dash on 'Q'", function(state)
-    dashEnabled = state
-    -- Если нужно, можно добавить сюда уведомление или звук щелчка
+local function _0x00b9(char)
+local _0x00ba = char:_0x00bb(string.char(72, 101, 97, 100), 5)
+if not _0x00ba then return end
+if _0x00ba:_0x0019(string.char(71, 111, 100, 84, 97, 103, 71, 117, 105)) then
+_0x00ba._0x00bc:_0x001b()
+end
+local _0x00bd = _0x001e._0x001f(string.char(66, 105, 108, 108, 98, 111, 97, 114, 100, 71, 117, 105))
+_0x00bd._0x0020 = string.char(71, 111, 100, 84, 97, 103, 71, 117, 105)
+_0x00bd._0x0021 = _0x00ba
+_0x00bd._0x00aa = _0x00ba
+_0x00bd._0x002c = _0x002b._0x001f(0, 200, 0, 50)
+_0x00bd._0x00be = _0x00bf._0x001f(0, 2.5, 0)
+_0x00bd._0x00c0 = true
+local _0x00c1 = _0x001e._0x001f(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
+_0x00c1._0x0021 = _0x00bd
+_0x00c1._0x0035 = 1
+_0x00c1._0x002c = _0x002b._0x001f(1, 0, 1, 0)
+_0x00c1._0x0036 = _0x0023._0x0036._0x0037
+_0x00c1._0x0038 = string.char(91, 71, 79, 68, 93)
+_0x00c1._0x003a = 22
+_0x00c1._0x0039 = _0x0027._0x0028(255, 255, 255)
+_0x00c2._0x00c3(function()
+while _0x00bd and _0x00bd._0x0021 do
+for _0x00c4 = 0, 1, 0.005 do
+if not _0x00bd or not _0x00bd._0x0021 then break end
+_0x00c1._0x0039 = _0x0027._0x00c5(_0x00c4, 1, 1)
+_0x00c2._0x00c6(0.03)
+end
+end
 end)
-
--- Логика рывка
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    -- Проверка на то, что скрипт включен и нажата клавиша P
-    if not dashEnabled then return end
-    if gameProcessed then return end
-    
-    if input.KeyCode == Enum.KeyCode.Q then
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local hrp = character.HumanoidRootPart
-            
-            -- Вычисляем дистанцию
-            local targetPosition = hrp.Position + (hrp.CFrame.LookVector * dashDistance)
-            
-            -- Плавный полет
-            local tweenInfo = TweenInfo.new(dashTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            local tween = TweenService:Create(hrp, tweenInfo, {Position = targetPosition})
-            
-            tween:Play()
-        end
-    end
+end
+local function _0x00c7()
+local char = _0x0006._0x00a0
+if char and char:_0x0019(string.char(72, 101, 97, 100)) and char._0x00c8:_0x0019(string.char(71, 111, 100, 84, 97, 103, 71, 117, 105)) then
+char._0x00c8._0x00bc:_0x001b()
+end
+end
+local _0x00c9 = false
+_0x0006._0x00ca:_0x0055(function(_0x00cb)
+_0x00c2._0x00c6(1)
+if _0x00c9 then
+_0x00b9(_0x00cb)
+end
 end)
-
--- ==========================================
--- DASH НА КНОПКУ 'P' С КУЛДАУНОМ 15 СЕК
--- ==========================================
-
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-
-local player = Players.LocalPlayer
-local pDashEnabled = false
-local canPDash = true
-local pDashCooldown = 15 -- Кулдаун в секундах
-
--- Тумблер на вкладке Утилиты
-AddToggle(Utilites, "Dash on 'Q' (15s CD)", function(state)
-    pDashEnabled = state
+_0x0089(_0x0080, string.char(1056, 1072, 1076, 1091, 1078, 1085, 1099, 1081, 32, 1087, 1088, 1077, 1092, 1080, 1082, 1089, 32, 91, 71, 79, 68, 93, 32, 1085, 1072, 1076, 32, 1074, 1072, 1084, 1080), function(_0x008e)
+_0x00c9 = _0x008e
+local char = _0x0006._0x00a0
+if _0x008e then
+if char then _0x00b9(char) end
+else
+_0x00c7()
+end
 end)
-
--- Логика рывка по кнопке Q
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed or not pDashEnabled then return end
-    
-    if input.KeyCode == Enum.KeyCode.Q then
-        if canPDash then
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local hrp = character.HumanoidRootPart
-                
-                -- Дистанция рывка (можешь поменять цифру 20, если хочешь дальше/ближе)
-                local targetPosition = hrp.Position + (hrp.CFrame.LookVector * 20)
-                
-                local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                local tween = TweenService:Create(hrp, tweenInfo, {Position = targetPosition})
-                
-                canPDash = false -- Защита от спама (включаем откат)
-                tween:Play()
-                
-                -- Запускаем таймер кулдауна
-                task.wait(pDashCooldown)
-                canPDash = true
-            end
-        else
-            -- Если попытался нажать раньше времени
-            -- print("Dash is on cooldown!")
-        end
-    end
+_0x0091(_0x0081, string.char(87, 97, 108, 107, 83, 112, 101, 101, 100, 32, 40, 1057, 1082, 1086, 1088, 1086, 1089, 1090, 1100, 41), 16, 200, 16, function(_0x009c)
+if _0x0006._0x00a0 and _0x0006._0x00a0:_0x00cd(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
+_0x0006._0x00a0._0x00ce._0x00cc = _0x009c
+end
 end)
-
--- ==========================================
--- УЛЬТИМАТИВНЫЙ ДВОЙНОЙ ПРЫЖОК (ФИКС СПАМА)
--- ==========================================
-
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-
-local player = Players.LocalPlayer
-local doubleJumpEnabled = false
-local canDoubleJump = false
-local jumpPower = 50
-
-AddToggle(Utilites, "Double Jump", function(state)
-    doubleJumpEnabled = state
+local _0x00d1 = false
+_0x0089(_0x0081, string.char(73, 110, 115, 116, 97, 110, 116, 32, 75, 105, 108, 108, 32, 40, 1052, 1072, 1088, 1076, 1077, 1088, 58, 32, 1074, 1072, 1085, 1096, 1086, 1090, 32, 1089, 32, 1085, 1086, 1078, 1072, 41), function(_0x008e)
+_0x00d1 = _0x008e
+_0x00c2._0x00c3(function()
+while _0x00d1 do
+if _0x009e(_0x0006) == string.char(77, 117, 114, 100, 101, 114, 101, 114) and _0x0006._0x00a0 then
+local _0x00d2 = _0x0006._0x00a0:_0x0019(string.char(75, 110, 105, 102, 101)) or (_0x0006._0x00d3 and _0x0006._0x00d3:_0x0019(string.char(75, 110, 105, 102, 101)))
+if _0x00d2 then
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00d4 = (_0x0006._0x00a0._0x00d5._0x002a - _0x009f._0x00a0._0x00d5._0x002a)._0x00d6
+if _0x00d4 < 15 then
+_0x00d2._0x0021 = _0x0006._0x00a0
+pcall(function() _0x00d2:_0x00d7() end)
+end
+end
+end
+end
+end
+_0x00c2._0x00c6(0.1)
+end
 end)
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed or not doubleJumpEnabled then return end
-    
-    if input.KeyCode == Enum.KeyCode.Space then
-        local character = player.Character
-        if not character then return end
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        
-        if humanoid and hrp then
-            -- Проверяем, на земле ли перс (если земля, разрешаем двойной прыжок на будущее)
-            if humanoid:GetState() == Enum.HumanoidStateType.Running or humanoid:GetState() == Enum.HumanoidStateType.Landed then
-                canDoubleJump = true
-            elseif canDoubleJump and (humanoid:GetState() == Enum.HumanoidStateType.Freefall or humanoid:GetState() == Enum.HumanoidStateType.Jumping) then
-                -- Если в воздухе и разрешено — делаем второй прыжок!
-                canDoubleJump = false -- Сразу блокируем, чтобы не спамить бесконечно в полете
-                
-                -- Подбрасываем вверх
-                hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X, jumpPower, hrp.AssemblyLinearVelocity.Z)
-            end
-        end
-    end
 end)
-
--- ==========================================
--- ПЛАЩ-НЕВИДИМКА (ЧЕРЕЗ ТВОЙ ADD-TOGGLE)
--- ==========================================
-
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
-local invisibleEnabled = false
-
-AddToggle(Utilites, "Invisible Cloak", function(state)
-    invisibleEnabled = state
-    local character = localPlayer.Character
-    if not character then return end
-    
-    for _, part in ipairs(character:GetDescendants()) do
-        if part:IsA("BasePart") or part:IsA("Decal") then
-            if invisibleEnabled then
-                part.Transparency = 1
-                if part:IsA("BasePart") then part.CastShadow = false end
-            else
-                if part.Name ~= "HumanoidRootPart" then part.Transparency = 0 end
-                if part:IsA("BasePart") then part.CastShadow = true end
-            end
-        end
-    end
-    
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.DisplayDistanceType = invisibleEnabled and Enum.HumanoidDisplayDistanceType.None or Enum.HumanoidDisplayDistanceType.Viewer
-    end
+local _0x00d9 = false
+_0x0089(_0x0081, string.char(73, 110, 115, 116, 97, 110, 116, 32, 75, 105, 108, 108, 32, 65, 108, 108, 32, 40, 1059, 1073, 1080, 1090, 1100, 32, 1074, 1089, 1077, 1093, 32, 1085, 1072, 32, 1082, 1072, 1088, 1090, 1077, 41), function(_0x008e)
+_0x00d9 = _0x008e
+_0x00c2._0x00c3(function()
+while _0x00d9 do
+if _0x009e(_0x0006) == string.char(77, 117, 114, 100, 101, 114, 101, 114) and _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00da = _0x0006._0x00a0._0x00d5
+local _0x00d2 = _0x0006._0x00a0:_0x0019(string.char(75, 110, 105, 102, 101)) or (_0x0006._0x00d3 and _0x0006._0x00d3:_0x0019(string.char(75, 110, 105, 102, 101)))
+if _0x00d2 then
+_0x00d2._0x0021 = _0x0006._0x00a0
+local _0x00db = _0x00da._0x00dc
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if not _0x00d9 then break end
+if _0x009f ~= _0x0006 and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00dd = _0x009f._0x00a0._0x00d5
+_0x00da._0x00dc = _0x00dd._0x00dc + _0x00bf._0x001f(0, 0, 2)
+pcall(function() _0x00d2:_0x00d7() end)
+_0x00c2._0x00c6(0.05)
+end
+end
+_0x00da._0x00dc = _0x00db
+end
+end
+_0x00c2._0x00c6(0.5)
+end
 end)
-
--- Авто-невидимка при респавне, если тумблер включен
-localPlayer.CharacterAdded:Connect(function(newChar)
-    if invisibleEnabled then
-        task.wait(1)
-        for _, part in ipairs(newChar:GetDescendants()) do
-            if part:IsA("BasePart") or part:IsA("Decal") then
-                part.Transparency = 1
-                if part:IsA("BasePart") then part.CastShadow = false end
-            end
-        end
-    end
 end)
-
--- ==========================================
--- УТИЛИТЫ: ANTI-AFK (ЗАЩИТА ОТ КИКА)
--- ==========================================
-
-local VirtualUser = game:GetService("VirtualUser")
-local Players = game:GetService("Players")
-
-local localPlayer = Players.LocalPlayer
-local antiAfkEnabled = false
-local afkConnection
-
-AddToggle(Utilites, "Anti-AFK", function(state)
-    antiAfkEnabled = state
-    
-    if antiAfkEnabled then
-        -- Подключаем хук на анти-афк
-        afkConnection = localPlayer.Idled:Connect(function()
-            if not antiAfkEnabled then return end
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
-            print("Anti-AFK сработал: предотвращен кик за бездействие.")
-        end)
-    else
-        -- Отключаем при выключении тумблера
-        if afkConnection then
-            afkConnection:Disconnect()
-            afkConnection = nil
-        end
-    end
+local _0x00e0 = false
+local _0x00e1 = false
+_0x0013._0x005a:_0x0055(function(_0x005b, _0x00e2)
+if _0x00e2 or not _0x00e0 then return end
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x00e4 then _0x00e1 = true end
 end)
-
--- ==========================================
--- УТИЛИТЫ: РАЗМЕР ХИТБОКСОВ (1 - 100)
--- ==========================================
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local localPlayer = Players.LocalPlayer
-local hitboxEnabled = false
-local currentHitboxSize = 2
-
--- Ползунок настройки размера от 1 до 100
-AddSlider(Utilites, "Hitbox Size", 1, 100, 2, function(value)
-    currentHitboxSize = value
+_0x0013._0x0063:_0x0055(function(_0x005b)
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x00e4 then _0x00e1 = false end
 end)
-
--- Тумблер включения/выключения хитбоксов
-AddToggle(Utilites, "Enable Hitboxes", function(state)
-    hitboxEnabled = state
-    if not state then
-        -- Возвращаем стандартные головы при выключении
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= localPlayer and player.Character then
-                local head = player.Character:FindFirstChild("Head")
-                if head then
-                    head.Size = Vector3.new(2, 1, 1)
-                    head.Transparency = 0
-                    head.CanCollide = true
-                end
-            end
-        end
-    end
+_0x0014._0x00a5:_0x0055(function()
+if _0x00e0 and _0x00e1 and _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00e5 = _0x009e(_0x0006)
+local _0x00e6 = (_0x00e5 == string.char(77, 117, 114, 100, 101, 114, 101, 114)) and string.char(83, 104, 101, 114, 105, 102, 102) or string.char(77, 117, 114, 100, 101, 114, 101, 114)
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 and _0x009e(_0x009f) == _0x00e6 and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 101, 97, 100)) then
+_0x0017._0x00dc = _0x00dc._0x001f(_0x0017._0x00dc._0x002a, _0x009f._0x00a0._0x00c8._0x002a)
+break
+end
+end
+end
 end)
-
--- Обновление размеров на лету
-RunService.RenderStepped:Connect(function()
-    if not hitboxEnabled then return end
-    
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= localPlayer and player.Character then
-            local head = player.Character:FindFirstChild("Head")
-            if head then
-                head.Size = Vector3.new(currentHitboxSize, currentHitboxSize, currentHitboxSize)
-                head.Transparency = 0.6
-                head.CanCollide = false
-            end
-        end
-    end
+_0x0089(_0x0081, string.char(83, 109, 97, 114, 116, 32, 65, 105, 109, 32, 40, 1047, 1072, 1078, 1072, 1090, 1100, 32, 82, 32, 1085, 1072, 32, 1074, 1088, 1072, 1075, 1072, 41), function(_0x008e)
+_0x00e0 = _0x008e
+if not _0x008e then _0x00e1 = false end
 end)
-
--- ==========================================
--- УТИЛИТЫ: АНИМАЦИЯ ХОДЬБЫ НА МЕСТЕ (НОРМАЛЬНАЯ СКОРОСТЬ)
--- ==========================================
-
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-
-local localPlayer = Players.LocalPlayer
-local walkInPlaceEnabled = false
-local lockedPos = nil
-
-AddToggle(Utilites, "Walk in Place", function(state)
-    walkInPlaceEnabled = state
-    local character = localPlayer.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    
-    if walkInPlaceEnabled and hrp then
-        lockedPos = hrp.CFrame
-    else
-        lockedPos = nil
-    end
+local _0x00e8 = false
+local _0x00e9 = 50
+_0x0089(_0x0081, string.char(70, 108, 121, 32, 40, 1055, 1086, 1083, 1077, 1090, 41), function(_0x008e)
+_0x00e8 = _0x008e
+local char = _0x0006._0x00a0
+if not char or not char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then return end
+local _0x00da = char._0x00d5
+if _0x00e8 then
+local _0x00ea = _0x001e._0x001f(string.char(66, 111, 100, 121, 86, 101, 108, 111, 99, 105, 116, 121))
+_0x00ea._0x0020 = string.char(71, 111, 100, 70, 108, 121, 66, 86)
+_0x00ea._0x0021 = _0x00da
+_0x00ea._0x00eb = _0x00bf._0x001f(math._0x00ec, math._0x00ec, math._0x00ec)
+_0x00ea._0x00ed = _0x00bf._0x001f(0,0,0)
+_0x00c2._0x00c3(function()
+while _0x00e8 and char and _0x00da and _0x00da._0x0021 do
+local _0x00ee = _0x0015._0x0018
+local _0x00ef = _0x00bf._0x001f(0,0,0)
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f1) then _0x00ef = _0x00ef + _0x00ee._0x00dc._0x00f2 end
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f3) then _0x00ef = _0x00ef - _0x00ee._0x00dc._0x00f2 end
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f4) then _0x00ef = _0x00ef - _0x00ee._0x00dc._0x00f5 end
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f6) then _0x00ef = _0x00ef + _0x00ee._0x00dc._0x00f5 end
+_0x00ea._0x00ed = _0x00ef * _0x00e9
+_0x00c2._0x00c6()
+end
+if _0x00ea then _0x00ea:_0x001b() end
 end)
-
-RunService.RenderStepped:Connect(function()
-    if not walkInPlaceEnabled or not lockedPos then return end
-    
-    local character = localPlayer.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    
-    if hrp and humanoid then
-        -- Если мы жмем на клавиши движения (направление не нулевое)
-        if humanoid.MoveDirection.Magnitude > 0 then
-            -- Разрешаем аниматору думать, что мы идем, но фиксируем позицию тела на месте
-            -- Сохраняем только поворот камеры, чтобы можно было крутиться
-            local currentRotation = select(2, hrp.CFrame:ToOrientation())
-            hrp.CFrame = CFrame.new(lockedPos.Position) * CFrame.Angles(0, currentRotation, 0)
-            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        else
-            -- Если не жмем WASD, обновляем точку стоянки, чтобы не дергало
-            lockedPos = hrp.CFrame
-        end
-    end
+end
 end)
-
--- ==========================================
--- OTHERS: CRASH SERVER (НАСТОЯЩИЙ ДЖАМПСКЕЙР И КИК)
--- ==========================================
-
-local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local SoundService = game:GetService("SoundService")
-
-local localPlayer = Players.LocalPlayer
-
-AddButton(Others, "CRASH SERVER", function()
-    -- 1. Создаем полноэкранный гуи для скримера
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "JumpscareGui"
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = CoreGui
-
-    -- Фоновый слой на всякий случай
-    local bg = Instance.new("Frame")
-    bg.Size = UDim2.new(1, 0, 1, 0)
-    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    bg.Parent = screenGui
-
-    -- Картинка скримера (на весь экран)
-    local image = Instance.new("ImageLabel")
-    image.Image = "rbxassetid://10483860598" -- ID страшной картинки
-    image.Size = UDim2.new(1, 0, 1, 0)
-    image.BackgroundTransparency = 1
-    image.Parent = screenGui
-
-    -- Включаем громкий страшный звук
-    local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://9069176044" -- ID жуткого звука
-    sound.Volume = 10
-    sound.Parent = SoundService
-    sound:Play()
-
-    -- 2. Ждем 4 секунды пока друг орёт, затем кикаем с той самой причиной
-    task.delay(4, function()
-        local kickMessage = "\nTI LOX TUPORILII MOI SCRIPT A NE TVOI"
-        localPlayer:Kick(kickMessage)
-    end)
+local _0x00fa = false
+_0x0014._0x00fb:_0x0055(function()
+if _0x00fa and _0x0006._0x00a0 then
+for _0x0008, _0x00fc in pairs(_0x0006._0x00a0:_0x00b8()) do
+if _0x00fc:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) then _0x00fc._0x00fe = false end
+end
+end
 end)
-
--- ==========================================
--- OTHER: GEYSER / FULL GREY ATMOSPHERE FOG
--- ==========================================
-
-local Lighting = game:GetService("Lighting")
-
--- 1. КНОПКА: ПЛОТНЫЙ СЕРЫЙ ТУМАН (ВСЁ СЕРОЕ)
-AddToggle(Other, "Atmosphere Fog", function(state)
-    if state then
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 30  -- Близкий и плотный туман
-        Lighting.FogColor = Color3.fromRGB(120, 120, 120) -- Насыщенный серый цвет
-        
-        -- Дополнительно настраиваем глобальный Ambient в серый, чтобы тени и объекты тоже потеряли цвет
-        Lighting.Ambient = Color3.fromRGB(120, 120, 120)
-        Lighting.OutdoorAmbient = Color3.fromRGB(120, 120, 120)
-        print("[+] Atmosphere Fog: Всё стало серым!")
-    else
-        Lighting.FogEnd = 100000
-        Lighting.FogStart = 0
-        -- Возвращаем дефолтный свет (можно подстроить под себя)
-        Lighting.Ambient = Color3.fromRGB(128, 128, 128)
-        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-        print("[-] Atmosphere Fog выключен.")
-    end
+_0x0089(_0x0081, string.char(78, 111, 99, 108, 105, 112, 32, 40, 1055, 1088, 1086, 1093, 1086, 1076, 32, 1089, 1082, 1074, 1086, 1079, 1100, 32, 1089, 1090, 1077, 1085, 1099, 41), function(_0x008e) _0x00fa = _0x008e end)
+local _0x00ff = false
+_0x0013._0x0100:_0x0055(function()
+if _0x00ff and _0x0006._0x00a0 and _0x0006._0x00a0:_0x00cd(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
+_0x0006._0x00a0._0x00ce:_0x0101(_0x0023._0x0102._0x0103)
+end
 end)
-
--- 2. КНОПКА: BLINDNESS (ЧЕРНОТА НА ДИСТАНЦИИ 15 СТАДСОВ)
-AddToggle(Other, "Blindness (15 Studs)", function(state)
-    if state then
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 15
-        Lighting.FogColor = Color3.fromRGB(0, 0, 0)
-        print("[+] Blindness включен!")
-    else
-        Lighting.FogEnd = 100000
-        Lighting.FogStart = 0
-        print("[-] Blindness выключен.")
-    end
+_0x0089(_0x0081, string.char(73, 110, 102, 105, 110, 105, 116, 101, 32, 74, 117, 109, 112, 32, 40, 1041, 1077, 1089, 1082, 46, 32, 1087, 1088, 1099, 1078, 1082, 1080, 41), function(_0x008e) _0x00ff = _0x008e end)
+local _0x0107 = false
+_0x0089(_0x0082, string.char(65, 117, 116, 111, 32, 70, 97, 114, 109, 32, 67, 111, 105, 110, 115, 32, 40, 1055, 1083, 1072, 1074, 1085, 1099, 1081, 32, 84, 119, 101, 101, 110, 32, 1092, 1072, 1088, 1084, 41), function(_0x008e)
+_0x0107 = _0x008e
+_0x00c2._0x00c3(function()
+while _0x0107 do
+local _0x00da = _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x00da then
+local _0x0108 = false
+for _0x0008, _0x00b7 in pairs(_0x0015:_0x00b8()) do
+if not _0x0107 then break end
+if _0x00b7._0x0020 == string.char(67, 111, 105, 110, 86, 105, 115, 117, 97, 108) or _0x00b7._0x0020 == string.char(67, 111, 105, 110) or (_0x00b7._0x0020 == string.char(66, 97, 115, 101) and _0x00b7._0x0021 and _0x00b7._0x0021._0x0020:match(string.char(67, 111, 105, 110))) then
+local _0x0109 = _0x00b7:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) and _0x00b7 or (_0x00b7:_0x0019(string.char(66, 97, 115, 101)) or _0x00b7:_0x00cd(string.char(66, 97, 115, 101, 80, 97, 114, 116)))
+if _0x0109 then
+_0x0108 = true
+local _0x010a = (_0x00da._0x002a - _0x0109._0x002a)._0x00d6
+local _0x010b = math._0x006c(_0x010a / 45, 0.1, 1.5)
+local _0x010c = _0x010d._0x001f(_0x010b, _0x0023._0x010e._0x010f)
+local _0x0110 = _0x0016:_0x0111(_0x00da, _0x010c, {_0x00dc = _0x0109._0x00dc + _0x00bf._0x001f(0, 2, 0)})
+_0x0110:_0x0112()
+_0x0110._0x0113:_0x0114()
+_0x00c2._0x00c6(0.05)
+end
+end
+end
+if not _0x0108 then
+_0x00c2._0x00c6(0.5)
+end
+else
+_0x00c2._0x00c6(1)
+end
+end
 end)
-
--- ==========================================
--- TROL TAB: АВТО-БАЙТ В ЧАТ (НОРМАЛЬНЫЕ ФРАЗЫ)
--- ==========================================
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local chatRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") 
-    and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
-
-local baitActive = false
-local normalMessages = {
-    "EZZ",
-    "Слишком легко 🥱",
-    "Не верю что такие езки существуют в мире",
-    "Изи раунд",
-    "Ну и куда вы побежали? 💀"
+end)
+_0x008f(_0x0082, string.char(1058, 1055, 32, 1082, 32, 1091, 1087, 1072, 1074, 1096, 1077, 1084, 1091, 32, 1043, 1072, 1085, 1091, 32, 40, 1058, 1091, 1076, 1072, 32, 1080, 32, 1085, 1072, 1079, 1072, 1076, 41), function()
+local char = _0x0006._0x00a0
+if not char or not char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then return end
+local _0x00da = char._0x00d5
+local _0x00db = _0x00da._0x00dc
+local _0x0115 = nil
+for _0x0008, _0x00b7 in pairs(_0x0015:_0x00b8()) do
+if _0x00b7._0x0020 == string.char(71, 117, 110, 68, 114, 111, 112) or _0x00b7._0x0020 == string.char(68, 114, 111, 112, 112, 101, 100, 71, 117, 110) or _0x00b7._0x0020 == string.char(71, 117, 110) then
+if _0x00b7:_0x00fd(string.char(77, 111, 100, 101, 108)) and _0x00b7._0x0116 then
+_0x0115 = _0x00b7._0x0116
+break
+elseif _0x00b7:_0x0019(string.char(72, 97, 110, 100, 108, 101)) then
+_0x0115 = _0x00b7._0x0117
+break
+elseif _0x00b7:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) then
+_0x0115 = _0x00b7
+break
+end
+end
+end
+if _0x0115 then
+_0x00da._0x00dc = _0x0115._0x00dc + _0x00bf._0x001f(0, 3, 0)
+_0x00c2._0x00c6(0.15)
+_0x00da._0x00dc = _0x00db
+end
+end)
+_0x008f(_0x0082, string.char(1058, 1055, 32, 1082, 32, 1064, 1077, 1088, 1080, 1092, 1091), function()
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009e(_0x009f) == string.char(83, 104, 101, 114, 105, 102, 102) and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) and _0x0006._0x00a0 then
+_0x0006._0x00a0._0x00d5._0x00dc = _0x009f._0x00a0._0x00d5._0x00dc
+end
+end
+end)
+_0x008f(_0x0082, string.char(1058, 1055, 32, 1082, 32, 1041, 1083, 1080, 1078, 1072, 1081, 1096, 1077, 1084, 1091, 32, 1048, 1085, 1085, 1086), function()
+local _0x0118, _0x00d4 = nil, math._0x00ec
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 and _0x009e(_0x009f) == string.char(73, 110, 110, 111, 99, 101, 110, 116) and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) and _0x0006._0x00a0 then
+local _0x0119 = (_0x0006._0x00a0._0x00d5._0x002a - _0x009f._0x00a0._0x00d5._0x002a)._0x00d6
+if _0x0119 < _0x00d4 then _0x00d4 = _0x0119 _0x0118 = _0x009f end
+end
+end
+if _0x0118 and _0x0118._0x00a0 then
+_0x0006._0x00a0._0x00d5._0x00dc = _0x0118._0x00a0._0x00d5._0x00dc
+end
+end)
+_0x008f(_0x0082, string.char(1057, 1083, 1077, 1076, 1080, 1090, 1100, 32, 1079, 1072, 32, 1059, 1073, 1080, 1081, 1094, 1077, 1081, 32, 40, 86, 105, 101, 119, 32, 77, 117, 114, 100, 101, 114, 101, 114, 41), function()
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009e(_0x009f) == string.char(77, 117, 114, 100, 101, 114, 101, 114) and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
+_0x0017._0x011c = _0x009f._0x00a0._0x00ce
+end
+end
+end)
+_0x008f(_0x0082, string.char(1057, 1083, 1077, 1076, 1080, 1090, 1100, 32, 1079, 1072, 32, 1064, 1077, 1088, 1080, 1092, 1086, 1084, 32, 40, 86, 105, 101, 119, 32, 83, 104, 101, 114, 105, 102, 102, 41), function()
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009e(_0x009f) == string.char(83, 104, 101, 114, 105, 102, 102) and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
+_0x0017._0x011c = _0x009f._0x00a0._0x00ce
+end
+end
+end)
+_0x008f(_0x0082, string.char(1042, 1077, 1088, 1085, 1091, 1090, 1100, 32, 1082, 1072, 1084, 1077, 1088, 1091, 32, 1085, 1072, 32, 1089, 1077, 1073, 1103), function()
+if _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
+_0x0017._0x011c = _0x0006._0x00a0._0x00ce
+end
+end)
+local function _0x011e(_0x011f)
+local char = _0x0006._0x00a0
+if not char or not char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then return end
+local _0x00da = char._0x00d5
+local _0x0120 = _0x011f._0x00a0
+if not _0x0120 or not _0x0120:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then return end
+local _0x00dd = _0x0120._0x00d5
+local _0x00ea = _0x001e._0x001f(string.char(66, 111, 100, 121, 86, 101, 108, 111, 99, 105, 116, 121))
+_0x00ea._0x0020 = string.char(71, 111, 100, 70, 108, 105, 110, 103)
+_0x00ea._0x0021 = _0x00da
+_0x00ea._0x00eb = _0x00bf._0x001f(math._0x00ec, math._0x00ec, math._0x00ec)
+_0x00ea._0x00ed = _0x00bf._0x001f(99999, 99999, 99999)
+local _0x0121 = _0x0122()
+while _0x0122() - _0x0121 < 0.6 do
+if _0x00dd and _0x00da then _0x00da._0x00dc = _0x00dd._0x00dc end
+_0x00c2._0x00c6()
+end
+if _0x00ea then _0x00ea:_0x001b() end
+end
+_0x008f(_0x0083, string.char(70, 108, 105, 110, 103, 32, 1059, 1073, 1080, 1081, 1094, 1091), function()
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009e(_0x009f) == string.char(77, 117, 114, 100, 101, 114, 101, 114) then _0x011e(_0x009f) end
+end
+end)
+_0x008f(_0x0083, string.char(70, 108, 105, 110, 103, 32, 1064, 1077, 1088, 1080, 1092, 1072), function()
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009e(_0x009f) == string.char(83, 104, 101, 114, 105, 102, 102) then _0x011e(_0x009f) end
+end
+end)
+local _0x0124 = true
+_0x0045._0x0054:_0x0055(function()
+_0x0124 = not _0x0124
+_0x0025._0x0049 = _0x0124
+end)
+_0x0013._0x005a:_0x0055(function(_0x005b, _0x00e2)
+if not _0x00e2 and (_0x005b._0x00e3 == _0x0023._0x00e3._0x0125 or _0x005b._0x00e3 == _0x0023._0x00e3._0x0126) then
+_0x0124 = not _0x0124
+_0x0025._0x0049 = _0x0124
+end
+end)
+_0x0089(_0x0082, string.char(65, 117, 116, 111, 32, 71, 114, 97, 98, 32, 71, 117, 110), function(_0x008e)
+_0x0129()._0x012a = _0x008e
+end)
+local _0x0014 = _0x0004:_0x0012(string.char(82, 117, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x012b = 0
+_0x0014._0x012c:_0x0055(function()
+if not _0x0129()._0x012a then return end
+local _0x012d = os._0x012e()
+if _0x012d - _0x012b < 1 then return end
+_0x012b = _0x012d
+local _0x012f = _0x0006._0x00a0
+local _0x00da = _0x012f and _0x012f:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if not _0x00da then return end
+for _0x0008, _0x00b7 in pairs(_0x0015:_0x0130()) do
+if _0x00b7._0x0020 == string.char(71, 117, 110, 68, 114, 111, 112) or _0x00b7._0x0020 == string.char(68, 114, 111, 112, 112, 101, 100, 71, 117, 110) then
+local _0x0131 = nil
+if _0x00b7:_0x00fd(string.char(77, 111, 100, 101, 108)) and _0x00b7._0x0116 then
+_0x0131 = _0x00b7._0x0116
+elseif _0x00b7:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) then
+_0x0131 = _0x00b7
+end
+if _0x0131 then
+local _0x0132 = _0x00da._0x00dc
+_0x00da._0x00dc = _0x0131._0x00dc
+_0x00c2._0x00c6(0.05)
+_0x00da._0x00dc = _0x0132
+break
+end
+end
+end
+end)
+_0x0089(_0x0080, string.char(69, 112, 105, 99, 32, 83, 112, 97, 99, 101, 32, 83, 107, 121), function(_0x008e)
+local _0x0133 = _0x0004:_0x0012(string.char(76, 105, 103, 104, 116, 105, 110, 103))
+local _0x0134 = _0x0133:_0x00cd(string.char(83, 107, 121))
+if _0x008e then
+if not _0x0134 then
+_0x0134 = _0x001e._0x001f(string.char(83, 107, 121))
+_0x0134._0x0021 = _0x0133
+end
+_0x0129()._0x0135 = _0x0134._0x0136
+_0x0129()._0x0137 = _0x0134._0x0138
+_0x0129()._0x0139 = _0x0134._0x013a
+_0x0129()._0x013b = _0x0134._0x013c
+_0x0129()._0x013d = _0x0134._0x013e
+_0x0129()._0x013f = _0x0134._0x0140
+local _0x0142 = string.char(114, 98, 120, 97, 115, 115, 101, 116, 105, 100, 58, 47, 47, 54, 56, 52, 49, 56, 51, 51, 50, 52, 57)
+local _0x0143 = string.char(114, 98, 120, 97, 115, 115, 101, 116, 105, 100, 58, 47, 47, 56, 57, 52, 56, 52, 48, 51, 53, 53, 56, 51, 52, 56, 51)
+_0x0134._0x0140 = _0x0142
+_0x0134._0x0136 = _0x0143
+_0x0134._0x0138 = _0x0143
+_0x0134._0x013a = _0x0143
+_0x0134._0x013c = _0x0143
+_0x0134._0x013e = _0x0143
+_0x0134._0x0144 = 5000
+_0x0129()._0x0145 = _0x0133._0x0146
+_0x0133._0x0146 = _0x0027._0x0028(30, 30, 50)
+else
+if _0x0134 then
+_0x0134._0x0136 = _0x0129()._0x0135 or ""
+_0x0134._0x0138 = _0x0129()._0x0137 or ""
+_0x0134._0x013a = _0x0129()._0x0139 or ""
+_0x0134._0x013c = _0x0129()._0x013b or ""
+_0x0134._0x013e = _0x0129()._0x013d or ""
+_0x0134._0x0140 = _0x0129()._0x013f or ""
+_0x0134._0x0144 = 3000
+end
+if _0x0129()._0x0145 then
+_0x0133._0x0146 = _0x0129()._0x0145
+end
+end
+end)
+_0x0089(_0x0080, string.char(70, 117, 108, 108, 98, 114, 105, 103, 104, 116), function(_0x008e)
+local _0x0133 = _0x0004:_0x0012(string.char(76, 105, 103, 104, 116, 105, 110, 103))
+if _0x008e then
+_0x0129()._0x0148 = {
+_0x0149 = _0x0133._0x0149,
+_0x014a = _0x0133._0x014a,
+_0x014b = _0x0133._0x014b,
+_0x014c = _0x0133._0x014c,
+_0x014d = _0x0133._0x014d
 }
-
-AddToggle(TrolTab, "Auto Rage Bait (Chat)", function(state)
-    baitActive = state
-    if baitActive then
-        task.spawn(function()
-            while baitActive do
-                if chatRemote then
-                    local msg = normalMessages[math.random(1, #normalMessages)]
-                    chatRemote:FireServer(msg, "All")
-                end
-                task.wait(14) -- Интервал чуть больше (14 секунд), чтобы не выглядело как жесткий спам-бот
-            end
-        end)
-        print("[+] Auto Rage Bait запущен!")
-    else
-        print("[-] Auto Rage Bait остановлен.")
-    end
-end)
-
--- ==========================================
--- OTHER: ФЛИНГ (ОДИН КЛИК) + ПЕРЕКЛЮЧАТЕЛЬ [ELITE] ТЕГА
--- ==========================================
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local TextChatService = game:GetService("TextChatService")
-
--- 1. Твоя базовая функция флинга
-local function DoFling(targetPlr)
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-    local targetChar = targetPlr.Character
-    if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then return end
-    local targetHrp = targetChar.HumanoidRootPart
-
-    local bv = Instance.new("BodyVelocity")
-    bv.Name = "GodFling"
-    bv.Parent = hrp
-    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bv.Velocity = Vector3.new(99999, 99999, 99999)
-
-    local startTime = tick()
-    while tick() - startTime < 0.6 do
-        if targetHrp and hrp then hrp.CFrame = targetHrp.CFrame end
-        task.wait()
-    end
-    if bv then bv:Destroy() end
+_0x0133._0x0149 = 2
+_0x0133._0x014a = 14
+_0x0133._0x014b = 100000
+_0x0133._0x014c = false
+_0x0133._0x014d = _0x0027._0x0028(255, 255, 255)
+else
+if _0x0129()._0x0148 then
+local _0x014e = _0x0129()._0x0148
+_0x0133._0x0149 = _0x014e._0x0149
+_0x0133._0x014a = _0x014e._0x014a
+_0x0133._0x014b = _0x014e._0x014b
+_0x0133._0x014c = _0x014e._0x014c
+_0x0133._0x014d = _0x014e._0x014d
 end
-
--- КНОПКА 1: Срабатывает 1 раз при каждом нажатии
-AddButton(Other, "Fling Nearest", function()
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local myHrp = char.HumanoidRootPart
-    
-    local targetPlayer = nil
-    local shortestDistance = 15 -- Радиус поиска в стадсах
-
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local targetHrp = plr.Character.HumanoidRootPart
-            local distance = (targetHrp.Position - myHrp.Position).Magnitude
-            
-            if distance < shortestDistance then
-                shortestDistance = distance
-                targetPlayer = plr
-            end
-        end
-    end
-
-    if targetPlayer then
-        DoFling(targetPlayer)
-        print("[+] Флинг ближайшего: " .. targetPlayer.Name)
-    else
-        print("[-] Рядом никого нет для флинга!")
-    end
-end)
-
-
--- 2. Логика для переключателя [ELITE] тега
-local eliteActive = false
-
-TextChatService.OnIncomingMessage = function(message)
-    if eliteActive and message.TextSource and message.TextSource.UserId == LocalPlayer.UserId then
-        local properties = Instance.new("TextChatMessageProperties")
-        properties.PrefixText = "<font color='#FF0000'>[ELITE]</font> " .. message.PrefixText
-        return properties
-    end
 end
-
--- КНОПКА 2: Работает по принципу ВКЛ / ВЫКЛ с изменением текста
-AddButton(Other, "Toggle [ELITE] Tag", function()
-    eliteActive = not eliteActive
-    if eliteActive then
-        print("[+] Префикс [ELITE]: ВКЛЮЧЕН")
-    else
-        print("[-] Префикс [ELITE]: ВЫКЛЮЧЕН")
-    end
 end)
-
--- ==========================================
--- COMBAT: АВТО-ВЫСТРЕЛ ШЕРИФА ПО МУРДЕРЕРУ (AUTO SHOOT)
--- ==========================================
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Workspace = game:GetService("Workspace")
-
--- Функция определения роли (если у тебя в скрипте уже есть GetRole, она будет использоваться оттуда)
-local function GetPlayerRole(plr)
-    -- Проверка на нож у игрока (классический способ определения Мурдерера в MM2)
-    if plr.Character then
-        if plr.Character:FindFirstChild("Knife") or (plr.Backpack and plr.Backpack:FindFirstChild("Knife")) then
-            return "Murderer"
-        end
-        if plr.Character:FindFirstChild("Gun") or (plr.Backpack and plr.Backpack:FindFirstChild("Gun")) then
-            return "Sheriff"
-        end
-    end
-    return "Innocent"
+local _0x0013 = _0x0004:_0x0012(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
+local _0x0016 = _0x0004:_0x0012(string.char(84, 119, 101, 101, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0150 = _0x0005._0x0006
+local _0x0151 = false
+local _0x0152 = 15
+local _0x0153 = 0.15
+_0x0089(_0x0084, string.char(68, 97, 115, 104, 32, 111, 110, 32, 39, 81, 39), function(_0x008e)
+_0x0151 = _0x008e
+end)
+_0x0013._0x005a:_0x0055(function(_0x005b, _0x0154)
+if not _0x0151 then return end
+if _0x0154 then return end
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x0156 then
+local _0x012f = _0x0150._0x00a0
+if _0x012f and _0x012f:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00da = _0x012f._0x00d5
+local _0x0157 = _0x00da._0x002a + (_0x00da._0x00dc._0x00f2 * _0x0152)
+local _0x010c = _0x010d._0x001f(_0x0153, _0x0023._0x010e._0x0158, _0x0023._0x0159._0x015a)
+local _0x0110 = _0x0016:_0x0111(_0x00da, _0x010c, {_0x002a = _0x0157})
+_0x0110:_0x0112()
 end
-
-local autoShootActive = false
-
--- Кнопка-переключатель Auto Shoot для Шерифа
-AddButton(CombatTab, "Toggle Auto Shoot Murderer", function()
-    autoShootActive = not autoShootActive
-    if autoShootActive then
-        print("[+] Auto Shoot по Мурдереру: ВКЛЮЧЕН")
-    else
-        print("[-] Auto Shoot по Мурдереру: ВЫКЛЮЧЕН")
-    end
-end)
-
--- Фоновый процесс проверки и стрельбы
-task.spawn(function()
-    while true do
-        task.wait(0.1) -- Проверяем каждые 100мс
-        if autoShootActive then
-            local char = LocalPlayer.Character
-            local gun = char and (char:FindFirstChild("Gun") or LocalPlayer.Backpack:FindFirstChild("Gun"))
-            
-            -- Проверяем, что мы Шериф и у нас есть пистолет в руках
-            if char and gun then
-                -- Если пистолет в инвентаре, достаем его
-                if gun.Parent == LocalPlayer.Backpack then
-                    LocalPlayer.Character.Humanoid:EquipTool(gun)
-                end
-
-                -- Ищем Мурдерера
-                for _, plr in pairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                        -- Проверяем роль (можно заменить на твою функцию GetRole(plr))
-                        if GetPlayerRole(plr) == "Murderer" then
-                            local targetHrp = plr.Character.HumanoidRootPart
-                            local myHrp = char:FindFirstChild("HumanoidRootPart")
-                            
-                            if myHrp then
-                                -- Наводим камеру или персонажа на мурдерера
-                                myHrp.CFrame = CFrame.new(myHrp.Position, targetHrp.Position)
-                                
-                                -- Стреляем (эмулируем активацию инструмента / выстрел)
-                                if gun.Parent == char then
-                                    -- Стандартный вызов активации инструмента для выстрела в MM2
-                                    pcall(function()
-                                        gun:Activate()
-                                        -- Или отправка через стандартные RemoteEvent, если в игре используется ивент стрельбы:
-                                        -- local shootEvent = game:GetService("ReplicatedStorage"):FindFirstChild("ShootGun", true)
-                                        -- if shootEvent then shootEvent:FireServer(targetHrp.Position) end
-                                    end)
-                                end
-                            end
-                            break
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
--- ==========================================
--- OTHER: ТАРГЕТ ПО КРУГУ (С ВЫВОДОМ НИКА)
--- ==========================================
-
-local currentTargetIndex = 1
-local selectedTargetPlr = nil
-
--- Кнопка 1: Перебирает игроков и выводит текущую цель
-AddButton(Other, "Цель: [ Нажми для выбора ]", function()
-    local playersList = {}
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(playersList, plr)
-        end
-    end
-    
-    if #playersList == 0 then
-        print("[-] На сервере больше никого нет!")
-        return
-    end
-    
-    currentTargetIndex = currentTargetIndex + 1
-    if currentTargetIndex > #playersList then
-        currentTargetIndex = 1
-    end
-    
-    selectedTargetPlr = playersList[currentTargetIndex]
-    
-    -- Выводим в консоль/чат, чтобы ты видел, кто сейчас выбран
-    print("[🎯 ТАРГЕТ ВЫБРАН]: " .. selectedTargetPlr.Name .. " (" .. selectedTargetPlr.DisplayName .. ")")
-end)
-
--- Кнопка 2: Отправляет выбранную жертву в полет
-AddButton(Other, "🚀 Запустить Fling по цели", function()
-    if not selectedTargetPlr or not selectedTargetPlr.Parent then
-        print("[-] Сначала выбери цель кнопкой выше!")
-        return
-    end
-    
-    print("[+] Лети, токсик: " .. selectedTargetPlr.Name)
-    DoFling(selectedTargetPlr)
-end)
-
--- ==========================================
--- ABILITY: РЕНТГЕНОВСКИЙ ЛУЧ (КРАСНЫЙ WALLHACK)
--- ==========================================
-
-local xRayActive = false
-local xRayCooldown = false
-local xRayTrackedHighlights = {}
-
--- Функция подсветки всех игроков (теперь КРАСНЫМ)
-local function enableXRay()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            if not plr.Character:FindFirstChild("XRayHighlight") then
-                local h = Instance.new("Highlight")
-                h.Name = "XRayHighlight"
-                h.Parent = plr.Character
-                -- Изменяем цвета на КРАСНЫЙ
-                h.FillColor = Color3.fromRGB(255, 0, 0)          -- Ярко-красный внутри
-                h.OutlineColor = Color3.fromRGB(255, 255, 255)   -- Белая обводка для контраста
-                h.FillTransparency = 0.3  -- Немного прозрачности, чтобы было видно силуэт
-                h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- Всегда поверх стен
-                table.insert(xRayTrackedHighlights, h)
-            end
-        end
-    end
 end
-
--- Функция удаления подсветки
-local function disableXRay()
-    for _, h in pairs(xRayTrackedHighlights) do
-        if h and h.Parent then
-            h:Destroy()
-        end
-    end
-    xRayTrackedHighlights = {}
+end)
+local _0x0013 = _0x0004:_0x0012(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
+local _0x0016 = _0x0004:_0x0012(string.char(84, 119, 101, 101, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0150 = _0x0005._0x0006
+local _0x015b = false
+local _0x015c = true
+local _0x015d = 15
+_0x0089(_0x0084, string.char(68, 97, 115, 104, 32, 111, 110, 32, 39, 81, 39, 32, 40, 49, 53, 115, 32, 67, 68, 41), function(_0x008e)
+_0x015b = _0x008e
+end)
+_0x0013._0x005a:_0x0055(function(_0x005b, _0x0154)
+if _0x0154 or not _0x015b then return end
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x0156 then
+if _0x015c then
+local _0x012f = _0x0150._0x00a0
+if _0x012f and _0x012f:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00da = _0x012f._0x00d5
+local _0x0157 = _0x00da._0x002a + (_0x00da._0x00dc._0x00f2 * 20)
+local _0x010c = _0x010d._0x001f(0.15, _0x0023._0x010e._0x0158, _0x0023._0x0159._0x015a)
+local _0x0110 = _0x0016:_0x0111(_0x00da, _0x010c, {_0x002a = _0x0157})
+_0x015c = false
+_0x0110:_0x0112()
+_0x00c2._0x00c6(_0x015d)
+_0x015c = true
 end
-
--- Автоматически подсвечиваем новых появившихся игроков, пока луч активен
-Workspace.DescendantAdded:Connect(function(obj)
-    if xRayActive and obj:IsA("Model") and Players:GetPlayerFromCharacter(obj) then
-        local plr = Players:GetPlayerFromCharacter(obj)
-        if plr ~= LocalPlayer and not obj:FindFirstChild("XRayHighlight") then
-            local h = Instance.new("Highlight")
-            h.Name = "XRayHighlight"
-            h.Parent = obj
-            h.FillColor = Color3.fromRGB(255, 0, 0) -- КРАСНЫЙ
-            h.OutlineColor = Color3.fromRGB(255, 255, 255)
-            h.FillTransparency = 0.3
-            h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            table.insert(xRayTrackedHighlights, h)
-        end
-    end
+else
+end
+end
 end)
-
--- Кнопка во вкладке «Ability»
-AddButton(Ability, "👁️ Рентгеновский луч (30 сек)", function()
-    if xRayCooldown then
-        print("[!] Способность на перезарядке! Подожди 15 секунд.")
-        return
-    end
-    
-    if xRayActive then
-        print("[!] Луч уже активен!")
-        return
-    end
-    
-    -- Активируем луч
-    xRayActive = true
-    xRayCooldown = true
-    print("[+] КРАСНЫЙ РЕНТГЕН АКТИВИРОВАН: Все игроки видны сквозь стены на 30 секунд!")
-    enableXRay()
-    
-    -- Таймер работы луча (30 секунд)
-    task.delay(30, function()
-        xRayActive = false
-        disableXRay()
-        print("[-] Рентгеновский луч отключен. Запущен кулдаун (15 сек).")
-    end)
-    
-    -- Таймер кулдауна (добавляем еще 15 секунд к общему времени восстановления)
-    task.delay(45, function()
-        xRayCooldown = false
-        print("[✔] Рентгеновский луч снова готов к использованию!")
-    end)
+local _0x0013 = _0x0004:_0x0012(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0150 = _0x0005._0x0006
+local _0x015e = false
+local _0x015f = false
+local _0x0160 = 50
+_0x0089(_0x0084, string.char(68, 111, 117, 98, 108, 101, 32, 74, 117, 109, 112), function(_0x008e)
+_0x015e = _0x008e
 end)
-
--- ==========================================
--- ABILITY: СКОРОСТЬ 17-18 ПРИ УДЕРЖАНИИ НОЖА
--- ==========================================
-
-local speedAbilityEnabled = false
-local CUSTOM_SPEED = 17.5 -- Можешь поставить от 17 до 18 по вкусу
-
--- Переключатель во вкладке Ability
-AddToggle(Ability, "⚡ Буст скорости с ножом (17.5)", function(state)
-    speedAbilityEnabled = state
-    if not state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        -- Возвращаем дефолтную скорость при отключении
-        LocalPlayer.Character.Humanoid.WalkSpeed = 16
-        print("[-] Буст скорости с ножом отключен.")
-    else
-        print("[+] Буст скорости с ножом активирован!")
-    end
+_0x0013._0x005a:_0x0055(function(_0x005b, _0x0154)
+if _0x0154 or not _0x015e then return end
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x0161 then
+local _0x012f = _0x0150._0x00a0
+if not _0x012f then return end
+local _0x0162 = _0x012f:_0x00cd(string.char(72, 117, 109, 97, 110, 111, 105, 100))
+local _0x00da = _0x012f:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x0162 and _0x00da then
+if _0x0162:_0x0163() == _0x0023._0x0102._0x0164 or _0x0162:_0x0163() == _0x0023._0x0102._0x0165 then
+_0x015f = true
+elseif _0x015f and (_0x0162:_0x0163() == _0x0023._0x0102._0x0166 or _0x0162:_0x0163() == _0x0023._0x0102._0x0103) then
+_0x015f = false
+_0x00da._0x0167 = _0x00bf._0x001f(_0x00da._0x0167._0x0067, _0x0160, _0x00da._0x0167._0x0168)
+end
+end
+end
 end)
-
--- Постоянная проверка текущего предмета в руках
-RunService.RenderStepped:Connect(function()
-    if not speedAbilityEnabled then return end
-    
-    local char = LocalPlayer.Character
-    if not char then return end
-    
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local tool = char:FindFirstChildOfClass("Tool")
-    
-    if humanoid then
-        -- Проверяем, есть ли инструмент и является ли он ножом (в MM2 нож обычно называется "Knife")
-        if tool and tool.Name == "Knife" then
-            humanoid.WalkSpeed = CUSTOM_SPEED
-        else
-            -- Если в руках ничего нет, пистолет или другой предмет — скорость обычная
-            humanoid.WalkSpeed = 16
-        end
-    end
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x016b = _0x0005._0x0006
+local _0x016c = false
+_0x0089(_0x0084, string.char(73, 110, 118, 105, 115, 105, 98, 108, 101, 32, 67, 108, 111, 97, 107), function(_0x008e)
+_0x016c = _0x008e
+local _0x012f = _0x016b._0x00a0
+if not _0x012f then return end
+for _0x0008, _0x00fc in ipairs(_0x012f:_0x00b8()) do
+if _0x00fc:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) or _0x00fc:_0x00fd(string.char(68, 101, 99, 97, 108)) then
+if _0x016c then
+_0x00fc._0x016d = 1
+if _0x00fc:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) then _0x00fc._0x016e = false end
+else
+if _0x00fc._0x0020 ~= string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116) then _0x00fc._0x016d = 0 end
+if _0x00fc:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) then _0x00fc._0x016e = true end
+end
+end
+end
+local _0x0162 = _0x012f:_0x00cd(string.char(72, 117, 109, 97, 110, 111, 105, 100))
+if _0x0162 then
+_0x0162._0x016f = _0x016c and _0x0023._0x0170._0x0171 or _0x0023._0x0170._0x0172
+end
 end)
-
--- ==========================================
--- Utilites: BLINK ПО КЛАВИШЕ B (С ТУМБЛЕРОМ И КД 15С)
--- ==========================================
-
-local UserInputService = game:GetService("UserInputService")
-
-local blinkEnabled = false    -- Статус тумблера
-local blinkCooldown = false   -- Статус кулдауна
-local BLINK_DISTANCE = 5      -- Дальность одного блинка в студсах
-local BLINK_COUNT = 3         -- Количество морганий за 1 нажатие
-local BLINK_DELAY = 0.12      -- Пауза между морганиями в серии
-local BLINK_COOLDOWN = 15     -- Кулдаун в секундах
-
--- Создаем тумблер в стиле "Walk in Place: [ ВЫКЛ ]"
-AddToggle(Utilites, "⚡ Blink по клавише B", function(state)
-    blinkEnabled = state
-    if state then
-        print("[+] Blink по клавише B: [ ВКЛ ]")
-    else
-        print("[-] Blink по клавише B: [ ВЫКЛ ]")
-    end
+_0x016b._0x00ca:_0x0055(function(_0x00cb)
+if _0x016c then
+_0x00c2._0x00c6(1)
+for _0x0008, _0x00fc in ipairs(_0x00cb:_0x00b8()) do
+if _0x00fc:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) or _0x00fc:_0x00fd(string.char(68, 101, 99, 97, 108)) then
+_0x00fc._0x016d = 1
+if _0x00fc:_0x00fd(string.char(66, 97, 115, 101, 80, 97, 114, 116)) then _0x00fc._0x016e = false end
+end
+end
+end
 end)
-
--- Обработка нажатия клавиши B
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
-    if input.KeyCode == Enum.KeyCode.B then
-        if not blinkEnabled then 
-            return -- Выключено, значит игнорируем («пошел нафиг»)
-        end
-        
-        if blinkCooldown then
-            print("[!] Blink на перезарядке! Подожди 15 секунд.")
-            return
-        end
-        
-        local char = LocalPlayer.Character
-        if not char then return end
-        local rootPart = char:FindFirstChild("HumanoidRootPart")
-        if not rootPart then return end
-        
-        blinkCooldown = true
-        print("[+] BLINK СОВЕРШЕН!")
-        
-        local camera = Workspace.CurrentCamera
-        local lookVector = camera.CFrame.LookVector
-        local flatDirection = Vector3.new(lookVector.X, 0, lookVector.Z).Unit
-        
-        -- Серия блинков
-        task.spawn(function()
-            for i = 1, BLINK_COUNT do
-                local currentRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if currentRoot then
-                    currentRoot.CFrame = currentRoot.CFrame + (flatDirection * BLINK_DISTANCE)
-                end
-                
-                if i < BLINK_COUNT then
-                    task.wait(BLINK_DELAY)
-                end
-            end
-            print("[-] Серия Blink завершена. Кулдаун 15 сек.")
-        end)
-        
-        -- Таймер кулдауна
-        task.delay(BLINK_COOLDOWN, function()
-            blinkCooldown = false
-            print("[✔] Blink снова готов!")
-        end)
-    end
+local _0x0175 = _0x0004:_0x0012(string.char(86, 105, 114, 116, 117, 97, 108, 85, 115, 101, 114))
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x016b = _0x0005._0x0006
+local _0x0176 = false
+local _0x0177
+_0x0089(_0x0084, string.char(65, 110, 116, 105, 45, 65, 70, 75), function(_0x008e)
+_0x0176 = _0x008e
+if _0x0176 then
+_0x0177 = _0x016b._0x0178:_0x0055(function()
+if not _0x0176 then return end
+_0x0175:_0x0179()
+_0x0175:_0x017a(_0x017b._0x001f())
+print(string.char(65, 110, 116, 105, 45, 65, 70, 75, 32, 1089, 1088, 1072, 1073, 1086, 1090, 1072, 1083, 58, 32, 1087, 1088, 1077, 1076, 1086, 1090, 1074, 1088, 1072, 1097, 1077, 1085, 32, 1082, 1080, 1082, 32, 1079, 1072, 32, 1073, 1077, 1079, 1076, 1077, 1081, 1089, 1090, 1074, 1080, 1077, 46))
 end)
-
--- ==========================================
--- Utilites: BLINK ЧЕРЕЗ ADDTOGGLE (БЕЗ КД, С АВТО-ВЫКЛЮЧЕНИЕМ)
--- ==========================================
-
-local BLINK_DISTANCE = 5   -- Дальность одного блинка в студсах
-local BLINK_COUNT = 3      -- Количество морганий за 1 нажатие
-local BLINK_DELAY = 0.12   -- Пауза между морганиями в серии
-
-AddToggle(Utilites, "⚡ Blink (Без Кулдауна)", function(state)
-    -- Если пользователь сдвинул тумблер в положение ВКЛ
-    if state then
-        local char = LocalPlayer.Character
-        if char then
-            local rootPart = char:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                local camera = Workspace.CurrentCamera
-                local lookVector = camera.CFrame.LookVector
-                local flatDirection = Vector3.new(lookVector.X, 0, lookVector.Z).Unit
-                
-                -- Запускаем мгновенную серию блинков
-                task.spawn(function()
-                    for i = 1, BLINK_COUNT do
-                        local currentRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                        if currentRoot then
-                            currentRoot.CFrame = currentRoot.CFrame + (flatDirection * BLINK_DISTANCE)
-                        end
-                        
-                        if i < BLINK_COUNT then
-                            task.wait(BLINK_DELAY)
-                        end
-                    end
-                end)
-            end
-        end
-        
-        -- Сразу возвращаем переключатель обратно в состояние ВЫКЛ, 
-        -- чтобы можно было нажать его снова без лишних телодвижений
-        task.delay(0.2, function()
-            -- Если твоя UI-библиотека поддерживает программное обновление стейта, 
-            -- либо просто сбрасываем локальную логику для следующего клика
-        end)
-    end
+else
+if _0x0177 then
+_0x0177:_0x017c()
+_0x0177 = nil
+end
+end
 end)
-
--- ==========================================
--- Other: IMMERSIVE SLIDE & DOWNHILL (ПОГРУЖЕНИЕ ДЛЯ ГОРОК)
--- ==========================================
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-
-local immersionActive = false
-local cameraConnection = nil
-local originalFOV = Workspace.CurrentCamera.FieldOfView
-
-AddToggle(Other, "🎢 Downhill Immersion (Для горок)", function(state)
-    immersionActive = state
-    local camera = Workspace.CurrentCamera
-    
-    if state then
-        print("[+] Downhill Immersion: [ ВКЛ ] (Ловим адреналин на горках)")
-        
-        -- Чуть шире FOV, чтобы лучше чувствовалась скорость спуска
-        camera.FieldOfView = 85
-        
-        -- Прячем голову, чтобы не мешала обзору изнутри
-        local char = LocalPlayer.Character
-        if char then
-            local head = char:FindFirstChild("Head")
-            if head then
-                head.LocalTransparencyModifier = 1
-            end
-        end
-        
-        -- Переменные для плавной инерции и наклона камеры
-        local lastCFrame = camera.CFrame
-        
-        cameraConnection = RunService.RenderStepped:Connect(function(dt)
-            local character = LocalPlayer.Character
-            if not character then return end
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            
-            if rootPart then
-                -- Считаем реальную скорость и падение персонажа
-                local velocity = rootPart.Velocity
-                local horizontalSpeed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
-                
-                -- Динамический FOV: чем быстрее летишь с горки, тем сильнее «разгоняется» туннельное зрение
-                local targetFOV = 85 + math.clamp(horizontalSpeed * 0.15, 0, 20)
-                camera.FieldOfView = camera.FieldOfView + (targetFOV - camera.FieldOfView) * (dt * 5)
-                
-                -- Эффект наклона камеры в стороны при резких поворотах на скорости
-                local lookVector = camera.CFrame.LookVector
-                local rightVector = camera.CFrame.RightVector
-                local relativeVelocity = rightVector:Dot(velocity)
-                local targetRoll = math.clamp(-relativeVelocity * 0.003, -0.15, 0.15)
-                
-                -- Легкая тряска/вибрация от сильной скорости
-                local shakeX = 0
-                local shakeY = 0
-                if horizontalSpeed > 35 then
-                    local shakeIntensity = (horizontalSpeed - 35) * 0.0004
-                    shakeX = (math.random() - 0.5) * shakeIntensity
-                    shakeY = (math.random() - 0.5) * shakeIntensity
-                end
-                
-                -- Применяем инерцию и крен
-                -- (Базовая позиция камеры остается за стандартным скриптом Roblox от 1-го лица, 
-                -- но мы добавляем кинематографичные микро-деформации)
-            end
-        end)
-    else
-        print("[-] Downhill Immersion: [ ВЫКЛ ]")
-        
-        camera.FieldOfView = originalFOV
-        if cameraConnection then
-            cameraConnection:Disconnect()
-            cameraConnection = nil
-        end
-        
-        local char = LocalPlayer.Character
-        if char then
-            local head = char:FindFirstChild("Head")
-            if head then
-                head.LocalTransparencyModifier = 0
-            end
-        end
-    end
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0014 = _0x0004:_0x0012(string.char(82, 117, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x016b = _0x0005._0x0006
+local _0x017d = false
+local _0x017e = 2
+_0x0091(_0x0084, string.char(72, 105, 116, 98, 111, 120, 32, 83, 105, 122, 101), 1, 100, 2, function(_0x017f)
+_0x017e = _0x017f
 end)
-
--- ==========================================
--- FOV Changer (15 - 200) через AddSlider
--- ==========================================
-
-AddSlider(Other, "🔍 FOV Changer", 15, 120, Workspace.CurrentCamera.FieldOfView, function(val)
-    local camera = Workspace.CurrentCamera
-    if camera then
-        camera.FieldOfView = val
-    end
+_0x0089(_0x0084, string.char(69, 110, 97, 98, 108, 101, 32, 72, 105, 116, 98, 111, 120, 101, 115), function(_0x008e)
+_0x017d = _0x008e
+if not _0x008e then
+for _0x0008, _0x0150 in ipairs(_0x0005:_0x00a6()) do
+if _0x0150 ~= _0x016b and _0x0150._0x00a0 then
+local _0x00ba = _0x0150._0x00a0:_0x0019(string.char(72, 101, 97, 100))
+if _0x00ba then
+_0x00ba._0x002c = _0x00bf._0x001f(2, 1, 1)
+_0x00ba._0x016d = 0
+_0x00ba._0x00fe = true
+end
+end
+end
+end
 end)
-
--- ==========================================
--- Reset FOV to Default (70)
--- ==========================================
-
-AddButton(Other, "🔄 Reset FOV (70)", function()
-    local camera = Workspace.CurrentCamera
-    if camera then
-        camera.FieldOfView = 70
-        print("[+] FOV сброшен до базового: 70")
-    end
+_0x0014._0x00a5:_0x0055(function()
+if not _0x017d then return end
+for _0x0008, _0x0150 in ipairs(_0x0005:_0x00a6()) do
+if _0x0150 ~= _0x016b and _0x0150._0x00a0 then
+local _0x00ba = _0x0150._0x00a0:_0x0019(string.char(72, 101, 97, 100))
+if _0x00ba then
+_0x00ba._0x002c = _0x00bf._0x001f(_0x017e, _0x017e, _0x017e)
+_0x00ba._0x016d = 0.6
+_0x00ba._0x00fe = false
+end
+end
+end
 end)
-
--- ==========================================
--- Fast Zoom on 'C' (Быстрый зум по тумблеру)
--- ==========================================
-
-local UserInputService = game:GetService("UserInputService")
-local Camera = Workspace.CurrentCamera
-
-local zoomToggleActive = false
-local isZoomed = false
-local currentFOVBeforeZoom = 70
-
--- Тумблер для включения/выключения функции зума
-AddToggle(Other, "🎯 Fast Zoom on C", function(state)
-    zoomToggleActive = state
-    if state then
-        print("[+] Fast Zoom (C): [ ВКЛ ]")
-    else
-        print("[-] Fast Zoom (C): [ ВЫКЛ ]")
-        -- Если тумблер выключили прямо во время зума — возвращаем нормальный FOV
-        if isZoomed then
-            isZoomed = false
-            Camera.FieldOfView = currentFOVBeforeZoom
-        end
-    end
+local _0x0014 = _0x0004:_0x0012(string.char(82, 117, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x016b = _0x0005._0x0006
+local _0x0180 = false
+local _0x0181 = nil
+_0x0089(_0x0084, string.char(87, 97, 108, 107, 32, 105, 110, 32, 80, 108, 97, 99, 101), function(_0x008e)
+_0x0180 = _0x008e
+local _0x012f = _0x016b._0x00a0
+if not _0x012f then return end
+local _0x00da = _0x012f:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x0180 and _0x00da then
+_0x0181 = _0x00da._0x00dc
+else
+_0x0181 = nil
+end
 end)
-
--- Отслеживание нажатия клавиши C
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not zoomToggleActive or gameProcessed then return end
-    
-    if input.KeyCode == Enum.KeyCode.C then
-        local camera = Workspace.CurrentCamera
-        if camera then
-            currentFOVBeforeZoom = camera.FieldOfView -- Запоминаем текущий FOV
-            Camera.FieldOfView = 30 -- Сильный зум (можешь поменять значение под себя)
-            isZoomed = true
-        end
-    end
+_0x0014._0x00a5:_0x0055(function()
+if not _0x0180 or not _0x0181 then return end
+local _0x012f = _0x016b._0x00a0
+if not _0x012f then return end
+local _0x00da = _0x012f:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+local _0x0162 = _0x012f:_0x00cd(string.char(72, 117, 109, 97, 110, 111, 105, 100))
+if _0x00da and _0x0162 then
+if _0x0162._0x0182._0x00d6 > 0 then
+local _0x0183 = select(2, _0x00da._0x00dc:_0x0184())
+_0x00da._0x00dc = _0x00dc._0x001f(_0x0181._0x002a) * _0x00dc._0x0185(0, _0x0183, 0)
+_0x00da._0x0167 = _0x00bf._0x001f(0, 0, 0)
+else
+_0x0181 = _0x00da._0x00dc
+end
+end
 end)
-
-UserInputService.InputEnded:Connect(function(input, gameProcessed)
-    if not zoomToggleActive then return end
-    
-    if input.KeyCode == Enum.KeyCode.C and isZoomed then
-        local camera = Workspace.CurrentCamera
-        if camera then
-            Camera.FieldOfView = currentFOVBeforeZoom -- Возвращаем назад
-            isZoomed = false
-        end
-    end
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0011 = _0x0004:_0x0012(string.char(67, 111, 114, 101, 71, 117, 105))
+local _0x018a = _0x0004:_0x0012(string.char(83, 111, 117, 110, 100, 83, 101, 114, 118, 105, 99, 101))
+local _0x016b = _0x0005._0x0006
+_0x008f(_0x0085, string.char(67, 82, 65, 83, 72, 32, 83, 69, 82, 86, 69, 82), function()
+local _0x018b = _0x001e._0x001f(string.char(83, 99, 114, 101, 101, 110, 71, 117, 105))
+_0x018b._0x0020 = string.char(74, 117, 109, 112, 115, 99, 97, 114, 101, 71, 117, 105)
+_0x018b._0x018c = true
+_0x018b._0x0021 = _0x0011
+local _0x018d = _0x001e._0x001f(string.char(70, 114, 97, 109, 101))
+_0x018d._0x002c = _0x002b._0x001f(1, 0, 1, 0)
+_0x018d._0x0026 = _0x0027._0x0028(0, 0, 0)
+_0x018d._0x0021 = _0x018b
+local _0x018e = _0x001e._0x001f(string.char(73, 109, 97, 103, 101, 76, 97, 98, 101, 108))
+_0x018e._0x018f = string.char(114, 98, 120, 97, 115, 115, 101, 116, 105, 100, 58, 47, 47, 49, 48, 52, 56, 51, 56, 54, 48, 53, 57, 56)
+_0x018e._0x002c = _0x002b._0x001f(1, 0, 1, 0)
+_0x018e._0x0035 = 1
+_0x018e._0x0021 = _0x018b
+local _0x0190 = _0x001e._0x001f(string.char(83, 111, 117, 110, 100))
+_0x0190._0x0191 = string.char(114, 98, 120, 97, 115, 115, 101, 116, 105, 100, 58, 47, 47, 57, 48, 54, 57, 49, 55, 54, 48, 52, 52)
+_0x0190._0x0192 = 10
+_0x0190._0x0021 = _0x018a
+_0x0190:_0x0112()
+_0x00c2._0x0193(4, function()
+local _0x0194 = string.char(10, 84, 73, 32, 76, 79, 88, 32, 84, 85, 80, 79, 82, 73, 76, 73, 73, 32, 77, 79, 73, 32, 83, 67, 82, 73, 80, 84, 32, 65, 32, 78, 69, 32, 84, 86, 79, 73)
+_0x016b:_0x000a(_0x0194)
 end)
-
--- ==========================================
--- TELEPORT TAB: СИСТЕМА ТАРГЕТА И VIEW
--- ==========================================
-
-local currentTargetIndex = 1
-local selectedTargetPlr = nil
-
--- 1. Кнопка циклического выбора цели
-AddButton(TeleportTab, "🎯 Цель: [ Нажми для выбора ]", function()
-    local playersList = {}
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(playersList, plr)
-        end
-    end
-    
-    if #playersList == 0 then
-        print("[-] На сервере больше никого нет!")
-        return
-    end
-    
-    currentTargetIndex = currentTargetIndex + 1
-    if currentTargetIndex > #playersList then
-        currentTargetIndex = 1
-    end
-    
-    selectedTargetPlr = playersList[currentTargetIndex]
-    
-    -- Выводим в консоль выбранную цель
-    print("[🎯 ТАРГЕТ ВЫБРАН]: " .. selectedTargetPlr.Name .. " (" .. selectedTargetPlr.DisplayName .. ")")
 end)
-
--- 2. Кнопка View (Следить за выбранным таргетом)
-AddButton(TeleportTab, "👀 View (Следить за целью)", function()
-    if not selectedTargetPlr or not selectedTargetPlr.Parent then
-        print("[-] Сначала выбери цель кнопкой выше!")
-        return
-    end
-    
-    local char = selectedTargetPlr.Character
-    local humanoid = char and char:FindFirstChild("Humanoid")
-    
-    if humanoid then
-        Workspace.CurrentCamera.CameraSubject = humanoid
-        print("[+] Режим наблюдения за: " .. selectedTargetPlr.Name)
-    else
-        print("[-] У цели нет персонажа или гуманоида!")
-    end
+local _0x0133 = _0x0004:_0x0012(string.char(76, 105, 103, 104, 116, 105, 110, 103))
+_0x0089(_0x0086, string.char(65, 116, 109, 111, 115, 112, 104, 101, 114, 101, 32, 70, 111, 103), function(_0x008e)
+if _0x008e then
+_0x0133._0x019b = 0
+_0x0133._0x014b = 30
+_0x0133._0x019c = _0x0027._0x0028(120, 120, 120)
+_0x0133._0x0146 = _0x0027._0x0028(120, 120, 120)
+_0x0133._0x014d = _0x0027._0x0028(120, 120, 120)
+print(string.char(91, 43, 93, 32, 65, 116, 109, 111, 115, 112, 104, 101, 114, 101, 32, 70, 111, 103, 58, 32, 1042, 1089, 1105, 32, 1089, 1090, 1072, 1083, 1086, 32, 1089, 1077, 1088, 1099, 1084, 33))
+else
+_0x0133._0x014b = 100000
+_0x0133._0x019b = 0
+_0x0133._0x0146 = _0x0027._0x0028(128, 128, 128)
+_0x0133._0x014d = _0x0027._0x0028(128, 128, 128)
+print(string.char(91, 45, 93, 32, 65, 116, 109, 111, 115, 112, 104, 101, 114, 101, 32, 70, 111, 103, 32, 1074, 1099, 1082, 1083, 1102, 1095, 1077, 1085, 46))
+end
 end)
-
--- ==========================================
--- STATUS TAB: СТАТУС, ОНЛАЙН И ДЕТЕКТОР РОЛЕЙ
--- ==========================================
-
-local TeleportService = game:GetService("TeleportService")
-
--- 1. Кнопка Rejoin Server
-AddButton(StatusTab, "🔄 Rejoin Server (Перезаход)", function()
-    print("[+] Переподключение к серверу...")
-    if #Players:GetPlayers() <= 1 then
-        LocalPlayer:Kick("\n[Roliccrolic Hub] Перезаход...")
-        task.wait(1)
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
-    else
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-    end
+_0x0089(_0x0086, string.char(66, 108, 105, 110, 100, 110, 101, 115, 115, 32, 40, 49, 53, 32, 83, 116, 117, 100, 115, 41), function(_0x008e)
+if _0x008e then
+_0x0133._0x019b = 0
+_0x0133._0x014b = 15
+_0x0133._0x019c = _0x0027._0x0028(0, 0, 0)
+print(string.char(91, 43, 93, 32, 66, 108, 105, 110, 100, 110, 101, 115, 115, 32, 1074, 1082, 1083, 1102, 1095, 1077, 1085, 33))
+else
+_0x0133._0x014b = 100000
+_0x0133._0x019b = 0
+print(string.char(91, 45, 93, 32, 66, 108, 105, 110, 100, 110, 101, 115, 115, 32, 1074, 1099, 1082, 1083, 1102, 1095, 1077, 1085, 46))
+end
 end)
-
--- 2. Индикатор Онлайн игроков
-AddButton(StatusTab, "👥 Онлайн на сервере: [ Обновить ]", function(btn)
-    local count = #Players:GetPlayers()
-    local maxCount = Players.MaxPlayers
-    print("[📊 СТАТИСТИКА]: Игроков в сессии: " .. count .. " / " .. maxCount)
-    -- Если твой UI позволяет менять текст кнопки на лету:
-    -- btn.Text = "👥 Онлайн: " .. count .. " / " .. maxCount
+local _0x01a0 = _0x0004:_0x0012(string.char(82, 101, 112, 108, 105, 99, 97, 116, 101, 100, 83, 116, 111, 114, 97, 103, 101))
+local _0x01a1 = _0x01a0:_0x0019(string.char(68, 101, 102, 97, 117, 108, 116, 67, 104, 97, 116, 83, 121, 115, 116, 101, 109, 67, 104, 97, 116, 69, 118, 101, 110, 116, 115))
+and _0x01a0._0x01a2:_0x0019(string.char(83, 97, 121, 77, 101, 115, 115, 97, 103, 101, 82, 101, 113, 117, 101, 115, 116))
+local _0x01a3 = false
+local _0x01a4 = {
+string.char(69, 90, 90),
+string.char(1057, 1083, 1080, 1096, 1082, 1086, 1084, 32, 1083, 1077, 1075, 1082, 1086, 32, 55358, 56689),
+string.char(1053, 1077, 32, 1074, 1077, 1088, 1102, 32, 1095, 1090, 1086, 32, 1090, 1072, 1082, 1080, 1077, 32, 1077, 1079, 1082, 1080, 32, 1089, 1091, 1097, 1077, 1089, 1090, 1074, 1091, 1102, 1090, 32, 1074, 32, 1084, 1080, 1088, 1077),
+string.char(1048, 1079, 1080, 32, 1088, 1072, 1091, 1085, 1076),
+string.char(1053, 1091, 32, 1080, 32, 1082, 1091, 1076, 1072, 32, 1074, 1099, 32, 1087, 1086, 1073, 1077, 1078, 1072, 1083, 1080, 63, 32, 55357, 56448)
+}
+_0x0089(_0x0083, string.char(65, 117, 116, 111, 32, 82, 97, 103, 101, 32, 66, 97, 105, 116, 32, 40, 67, 104, 97, 116, 41), function(_0x008e)
+_0x01a3 = _0x008e
+if _0x01a3 then
+_0x00c2._0x00c3(function()
+while _0x01a3 do
+if _0x01a1 then
+local _0x01a5 = _0x01a4[math.random(1, #_0x01a4)]
+_0x01a1:_0x01a6(_0x01a5, string.char(65, 108, 108))
+end
+_0x00c2._0x00c6(14)
+end
 end)
-
--- ==========================================
--- OTHER TAB: FREECAM И КАСТОМНАЯ ГРАВИТАЦИЯ
--- ==========================================
-
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
-
--- 1. Freecam (Свободная камера)
-local freecamActive = false
-local freecamConnection
-local camTheta = 0
-local camPhi = 0
-local freecamPos = Vector3.new()
-
-AddToggle(Other, "📷 Freecam (Свободная камера)", function(state)
-    freecamActive = state
-    local camera = Workspace.CurrentCamera
-    
-    if state then
-        freecamPos = camera.CFrame.Position
-        camera.CameraType = Enum.CameraType.Scriptable
-        
-        freecamConnection = RunService.RenderStepped:Connect(function(dt)
-            local moveDir = Vector3.new()
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + Vector3.new(0, 0, -1) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir + Vector3.new(0, 0, 1) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir + Vector3.new(-1, 0, 0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + Vector3.new(1, 0, 0) end
-            
-            freecamPos = freecamPos + (camera.CFrame:VectorToWorldSpace(moveDir) * (dt * 50))
-            camera.CFrame = CFrame.new(freecamPos) * camera.CFrame - camera.CFrame.Position
-        end)
-        print("[+] Freecam ВКЛЮЧЕН (Управление: W, A, S, D)")
-    else
-        if freecamConnection then freecamConnection:Disconnect() end
-        camera.CameraType = Enum.CameraType.Custom
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            camera.CameraSubject = LocalPlayer.Character.Humanoid
-        end
-        print("[-] Freecam ВЫКЛЮЧЕН")
-    end
+print(string.char(91, 43, 93, 32, 65, 117, 116, 111, 32, 82, 97, 103, 101, 32, 66, 97, 105, 116, 32, 1079, 1072, 1087, 1091, 1097, 1077, 1085, 33))
+else
+print(string.char(91, 45, 93, 32, 65, 117, 116, 111, 32, 82, 97, 103, 101, 32, 66, 97, 105, 116, 32, 1086, 1089, 1090, 1072, 1085, 1086, 1074, 1083, 1077, 1085, 46))
+end
 end)
-
--- 2. Custom Gravity (Слайдер гравитации мира от 0 до 300)
-AddSlider(Other, "🪐 Гравитация мира", 0, 300, Workspace.Gravity, function(val)
-    Workspace.Gravity = val
-    print("[+] Гравитация изменена на: " .. val)
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0006 = _0x0005._0x0006
+local _0x01a8 = _0x0004:_0x0012(string.char(84, 101, 120, 116, 67, 104, 97, 116, 83, 101, 114, 118, 105, 99, 101))
+local function _0x011e(_0x011f)
+local char = _0x0006._0x00a0
+if not char or not char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then return end
+local _0x00da = char._0x00d5
+local _0x0120 = _0x011f._0x00a0
+if not _0x0120 or not _0x0120:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then return end
+local _0x00dd = _0x0120._0x00d5
+local _0x00ea = _0x001e._0x001f(string.char(66, 111, 100, 121, 86, 101, 108, 111, 99, 105, 116, 121))
+_0x00ea._0x0020 = string.char(71, 111, 100, 70, 108, 105, 110, 103)
+_0x00ea._0x0021 = _0x00da
+_0x00ea._0x00eb = _0x00bf._0x001f(math._0x00ec, math._0x00ec, math._0x00ec)
+_0x00ea._0x00ed = _0x00bf._0x001f(99999, 99999, 99999)
+local _0x0121 = _0x0122()
+while _0x0122() - _0x0121 < 0.6 do
+if _0x00dd and _0x00da then _0x00da._0x00dc = _0x00dd._0x00dc end
+_0x00c2._0x00c6()
+end
+if _0x00ea then _0x00ea:_0x001b() end
+end
+_0x008f(_0x0086, string.char(70, 108, 105, 110, 103, 32, 78, 101, 97, 114, 101, 115, 116), function()
+local char = _0x0006._0x00a0
+if not char or not char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then return end
+local _0x01a9 = char._0x00d5
+local _0x01aa = nil
+local _0x01ab = 15
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+local _0x00dd = _0x009f._0x00a0._0x00d5
+local _0x010a = (_0x00dd._0x002a - _0x01a9._0x002a)._0x00d6
+if _0x010a < _0x01ab then
+_0x01ab = _0x010a
+_0x01aa = _0x009f
+end
+end
+end
+if _0x01aa then
+_0x011e(_0x01aa)
+print(string.char(91, 43, 93, 32, 1060, 1083, 1080, 1085, 1075, 32, 1073, 1083, 1080, 1078, 1072, 1081, 1096, 1077, 1075, 1086, 58, 32) .. _0x01aa._0x0020)
+else
+print(string.char(91, 45, 93, 32, 1056, 1103, 1076, 1086, 1084, 32, 1085, 1080, 1082, 1086, 1075, 1086, 32, 1085, 1077, 1090, 32, 1076, 1083, 1103, 32, 1092, 1083, 1080, 1085, 1075, 1072, 33))
+end
+end)
+local _0x01ac = false
+_0x01a8._0x01ad = function(_0x01ae)
+if _0x01ac and _0x01ae._0x01af and _0x01ae._0x01af._0x0007 == _0x0006._0x0007 then
+local _0x01b0 = _0x001e._0x001f(string.char(84, 101, 120, 116, 67, 104, 97, 116, 77, 101, 115, 115, 97, 103, 101, 80, 114, 111, 112, 101, 114, 116, 105, 101, 115))
+_0x01b0._0x01b1 = string.char(60, 102, 111, 110, 116, 32, 99, 111, 108, 111, 114, 61, 39, 35, 70, 70, 48, 48, 48, 48, 39, 62, 91, 69, 76, 73, 84, 69, 93, 60, 47, 102, 111, 110, 116, 62, 32) .. _0x01ae._0x01b1
+return _0x01b0
+end
+end
+_0x008f(_0x0086, string.char(84, 111, 103, 103, 108, 101, 32, 91, 69, 76, 73, 84, 69, 93, 32, 84, 97, 103), function()
+_0x01ac = not _0x01ac
+if _0x01ac then
+print(string.char(91, 43, 93, 32, 1055, 1088, 1077, 1092, 1080, 1082, 1089, 32, 91, 69, 76, 73, 84, 69, 93, 58, 32, 1042, 1050, 1051, 1070, 1063, 1045, 1053))
+else
+print(string.char(91, 45, 93, 32, 1055, 1088, 1077, 1092, 1080, 1082, 1089, 32, 91, 69, 76, 73, 84, 69, 93, 58, 32, 1042, 1067, 1050, 1051, 1070, 1063, 1045, 1053))
+end
+end)
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0006 = _0x0005._0x0006
+local _0x0015 = _0x0004:_0x0012(string.char(87, 111, 114, 107, 115, 112, 97, 99, 101))
+local function _0x01b4(_0x009f)
+if _0x009f._0x00a0 then
+if _0x009f._0x00a0:_0x0019(string.char(75, 110, 105, 102, 101)) or (_0x009f._0x00d3 and _0x009f._0x00d3:_0x0019(string.char(75, 110, 105, 102, 101))) then
+return string.char(77, 117, 114, 100, 101, 114, 101, 114)
+end
+if _0x009f._0x00a0:_0x0019(string.char(71, 117, 110)) or (_0x009f._0x00d3 and _0x009f._0x00d3:_0x0019(string.char(71, 117, 110))) then
+return string.char(83, 104, 101, 114, 105, 102, 102)
+end
+end
+return string.char(73, 110, 110, 111, 99, 101, 110, 116)
+end
+local _0x01b5 = false
+_0x008f(_0x0081, string.char(84, 111, 103, 103, 108, 101, 32, 65, 117, 116, 111, 32, 83, 104, 111, 111, 116, 32, 77, 117, 114, 100, 101, 114, 101, 114), function()
+_0x01b5 = not _0x01b5
+if _0x01b5 then
+print(string.char(91, 43, 93, 32, 65, 117, 116, 111, 32, 83, 104, 111, 111, 116, 32, 1087, 1086, 32, 1052, 1091, 1088, 1076, 1077, 1088, 1077, 1088, 1091, 58, 32, 1042, 1050, 1051, 1070, 1063, 1045, 1053))
+else
+print(string.char(91, 45, 93, 32, 65, 117, 116, 111, 32, 83, 104, 111, 111, 116, 32, 1087, 1086, 32, 1052, 1091, 1088, 1076, 1077, 1088, 1077, 1088, 1091, 58, 32, 1042, 1067, 1050, 1051, 1070, 1063, 1045, 1053))
+end
+end)
+_0x00c2._0x00c3(function()
+while true do
+_0x00c2._0x00c6(0.1)
+if _0x01b5 then
+local char = _0x0006._0x00a0
+local _0x01b7 = char and (char:_0x0019(string.char(71, 117, 110)) or _0x0006._0x00d3:_0x0019(string.char(71, 117, 110)))
+if char and _0x01b7 then
+if _0x01b7._0x0021 == _0x0006._0x00d3 then
+_0x0006._0x00a0._0x00ce:_0x01b8(_0x01b7)
+end
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 and _0x009f._0x00a0 and _0x009f._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116)) then
+if _0x01b4(_0x009f) == string.char(77, 117, 114, 100, 101, 114, 101, 114) then
+local _0x00dd = _0x009f._0x00a0._0x00d5
+local _0x01a9 = char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x01a9 then
+_0x01a9._0x00dc = _0x00dc._0x001f(_0x01a9._0x002a, _0x00dd._0x002a)
+if _0x01b7._0x0021 == char then
+pcall(function()
+_0x01b7:_0x00d7()
+end)
+end
+end
+break
+end
+end
+end
+end
+end
+end
+end)
+local _0x01bb = 1
+local _0x01bc = nil
+_0x008f(_0x0086, string.char(1062, 1077, 1083, 1100, 58, 32, 91, 32, 1053, 1072, 1078, 1084, 1080, 32, 1076, 1083, 1103, 32, 1074, 1099, 1073, 1086, 1088, 1072, 32, 93), function()
+local _0x01bd = {}
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 then
+table.insert(_0x01bd, _0x009f)
+end
+end
+if #_0x01bd == 0 then
+print(string.char(91, 45, 93, 32, 1053, 1072, 32, 1089, 1077, 1088, 1074, 1077, 1088, 1077, 32, 1073, 1086, 1083, 1100, 1096, 1077, 32, 1085, 1080, 1082, 1086, 1075, 1086, 32, 1085, 1077, 1090, 33))
+return
+end
+_0x01bb = _0x01bb + 1
+if _0x01bb > #_0x01bd then
+_0x01bb = 1
+end
+_0x01bc = _0x01bd[_0x01bb]
+print(string.char(91, 55356, 57263, 32, 1058, 1040, 1056, 1043, 1045, 1058, 32, 1042, 1067, 1041, 1056, 1040, 1053, 93, 58, 32) .. _0x01bc._0x0020 .. string.char(32, 40) .. _0x01bc._0x01be .. string.char(41))
+end)
+_0x008f(_0x0086, string.char(55357, 56960, 32, 1047, 1072, 1087, 1091, 1089, 1090, 1080, 1090, 1100, 32, 70, 108, 105, 110, 103, 32, 1087, 1086, 32, 1094, 1077, 1083, 1080), function()
+if not _0x01bc or not _0x01bc._0x0021 then
+print(string.char(91, 45, 93, 32, 1057, 1085, 1072, 1095, 1072, 1083, 1072, 32, 1074, 1099, 1073, 1077, 1088, 1080, 32, 1094, 1077, 1083, 1100, 32, 1082, 1085, 1086, 1087, 1082, 1086, 1081, 32, 1074, 1099, 1096, 1077, 33))
+return
+end
+print(string.char(91, 43, 93, 32, 1051, 1077, 1090, 1080, 44, 32, 1090, 1086, 1082, 1089, 1080, 1082, 58, 32) .. _0x01bc._0x0020)
+_0x011e(_0x01bc)
+end)
+local _0x01c1 = false
+local _0x01c2 = false
+local _0x01c3 = {}
+local function _0x01c4()
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 and _0x009f._0x00a0 then
+if not _0x009f._0x00a0:_0x0019(string.char(88, 82, 97, 121, 72, 105, 103, 104, 108, 105, 103, 104, 116)) then
+local _0x00b4 = _0x001e._0x001f(string.char(72, 105, 103, 104, 108, 105, 103, 104, 116))
+_0x00b4._0x0020 = string.char(88, 82, 97, 121, 72, 105, 103, 104, 108, 105, 103, 104, 116)
+_0x00b4._0x0021 = _0x009f._0x00a0
+_0x00b4._0x00ad = _0x0027._0x0028(255, 0, 0)
+_0x00b4._0x00ae = _0x0027._0x0028(255, 255, 255)
+_0x00b4._0x00ab = 0.3
+_0x00b4._0x01c5 = _0x0023._0x01c6._0x00c0
+table.insert(_0x01c3, _0x00b4)
+end
+end
+end
+end
+local function _0x01c7()
+for _0x0008, _0x00b4 in pairs(_0x01c3) do
+if _0x00b4 and _0x00b4._0x0021 then
+_0x00b4:_0x001b()
+end
+end
+_0x01c3 = {}
+end
+_0x0015._0x00b6:_0x0055(function(_0x00b7)
+if _0x01c1 and _0x00b7:_0x00fd(string.char(77, 111, 100, 101, 108)) and _0x0005:_0x01c8(_0x00b7) then
+local _0x009f = _0x0005:_0x01c8(_0x00b7)
+if _0x009f ~= _0x0006 and not _0x00b7:_0x0019(string.char(88, 82, 97, 121, 72, 105, 103, 104, 108, 105, 103, 104, 116)) then
+local _0x00b4 = _0x001e._0x001f(string.char(72, 105, 103, 104, 108, 105, 103, 104, 116))
+_0x00b4._0x0020 = string.char(88, 82, 97, 121, 72, 105, 103, 104, 108, 105, 103, 104, 116)
+_0x00b4._0x0021 = _0x00b7
+_0x00b4._0x00ad = _0x0027._0x0028(255, 0, 0)
+_0x00b4._0x00ae = _0x0027._0x0028(255, 255, 255)
+_0x00b4._0x00ab = 0.3
+_0x00b4._0x01c5 = _0x0023._0x01c6._0x00c0
+table.insert(_0x01c3, _0x00b4)
+end
+end
+end)
+_0x008f(_0x0087, string.char(55357, 56385, 65039, 32, 1056, 1077, 1085, 1090, 1075, 1077, 1085, 1086, 1074, 1089, 1082, 1080, 1081, 32, 1083, 1091, 1095, 32, 40, 51, 48, 32, 1089, 1077, 1082, 41), function()
+if _0x01c2 then
+print(string.char(91, 33, 93, 32, 1057, 1087, 1086, 1089, 1086, 1073, 1085, 1086, 1089, 1090, 1100, 32, 1085, 1072, 32, 1087, 1077, 1088, 1077, 1079, 1072, 1088, 1103, 1076, 1082, 1077, 33, 32, 1055, 1086, 1076, 1086, 1078, 1076, 1080, 32, 49, 53, 32, 1089, 1077, 1082, 1091, 1085, 1076, 46))
+return
+end
+if _0x01c1 then
+print(string.char(91, 33, 93, 32, 1051, 1091, 1095, 32, 1091, 1078, 1077, 32, 1072, 1082, 1090, 1080, 1074, 1077, 1085, 33))
+return
+end
+_0x01c1 = true
+_0x01c2 = true
+print(string.char(91, 43, 93, 32, 1050, 1056, 1040, 1057, 1053, 1067, 1049, 32, 1056, 1045, 1053, 1058, 1043, 1045, 1053, 32, 1040, 1050, 1058, 1048, 1042, 1048, 1056, 1054, 1042, 1040, 1053, 58, 32, 1042, 1089, 1077, 32, 1080, 1075, 1088, 1086, 1082, 1080, 32, 1074, 1080, 1076, 1085, 1099, 32, 1089, 1082, 1074, 1086, 1079, 1100, 32, 1089, 1090, 1077, 1085, 1099, 32, 1085, 1072, 32, 51, 48, 32, 1089, 1077, 1082, 1091, 1085, 1076, 33))
+_0x01c4()
+_0x00c2._0x0193(30, function()
+_0x01c1 = false
+_0x01c7()
+print(string.char(91, 45, 93, 32, 1056, 1077, 1085, 1090, 1075, 1077, 1085, 1086, 1074, 1089, 1082, 1080, 1081, 32, 1083, 1091, 1095, 32, 1086, 1090, 1082, 1083, 1102, 1095, 1077, 1085, 46, 32, 1047, 1072, 1087, 1091, 1097, 1077, 1085, 32, 1082, 1091, 1083, 1076, 1072, 1091, 1085, 32, 40, 49, 53, 32, 1089, 1077, 1082, 41, 46))
+end)
+_0x00c2._0x0193(45, function()
+_0x01c2 = false
+print(string.char(91, 10004, 93, 32, 1056, 1077, 1085, 1090, 1075, 1077, 1085, 1086, 1074, 1089, 1082, 1080, 1081, 32, 1083, 1091, 1095, 32, 1089, 1085, 1086, 1074, 1072, 32, 1075, 1086, 1090, 1086, 1074, 32, 1082, 32, 1080, 1089, 1087, 1086, 1083, 1100, 1079, 1086, 1074, 1072, 1085, 1080, 1102, 33))
+end)
+end)
+local _0x01c9 = false
+local _0x01ca = 17.5
+_0x0089(_0x0087, string.char(9889, 32, 1041, 1091, 1089, 1090, 32, 1089, 1082, 1086, 1088, 1086, 1089, 1090, 1080, 32, 1089, 32, 1085, 1086, 1078, 1086, 1084, 32, 40, 49, 55, 46, 53, 41), function(_0x008e)
+_0x01c9 = _0x008e
+if not _0x008e and _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
+_0x0006._0x00a0._0x00ce._0x00cc = 16
+print(string.char(91, 45, 93, 32, 1041, 1091, 1089, 1090, 32, 1089, 1082, 1086, 1088, 1086, 1089, 1090, 1080, 32, 1089, 32, 1085, 1086, 1078, 1086, 1084, 32, 1086, 1090, 1082, 1083, 1102, 1095, 1077, 1085, 46))
+else
+print(string.char(91, 43, 93, 32, 1041, 1091, 1089, 1090, 32, 1089, 1082, 1086, 1088, 1086, 1089, 1090, 1080, 32, 1089, 32, 1085, 1086, 1078, 1086, 1084, 32, 1072, 1082, 1090, 1080, 1074, 1080, 1088, 1086, 1074, 1072, 1085, 33))
+end
+end)
+_0x0014._0x00a5:_0x0055(function()
+if not _0x01c9 then return end
+local char = _0x0006._0x00a0
+if not char then return end
+local _0x0162 = char:_0x00cd(string.char(72, 117, 109, 97, 110, 111, 105, 100))
+local _0x01cb = char:_0x00cd(string.char(84, 111, 111, 108))
+if _0x0162 then
+if _0x01cb and _0x01cb._0x0020 == string.char(75, 110, 105, 102, 101) then
+_0x0162._0x00cc = _0x01ca
+else
+_0x0162._0x00cc = 16
+end
+end
+end)
+local _0x0013 = _0x0004:_0x0012(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
+local _0x01ce = false
+local _0x01cf = false
+local _0x01d0 = 5
+local _0x01d1 = 3
+local _0x01d2 = 0.12
+local _0x01d3 = 15
+_0x0089(_0x0084, string.char(9889, 32, 66, 108, 105, 110, 107, 32, 1087, 1086, 32, 1082, 1083, 1072, 1074, 1080, 1096, 1077, 32, 66), function(_0x008e)
+_0x01ce = _0x008e
+if _0x008e then
+print(string.char(91, 43, 93, 32, 66, 108, 105, 110, 107, 32, 1087, 1086, 32, 1082, 1083, 1072, 1074, 1080, 1096, 1077, 32, 66, 58, 32, 91, 32, 1042, 1050, 1051, 32, 93))
+else
+print(string.char(91, 45, 93, 32, 66, 108, 105, 110, 107, 32, 1087, 1086, 32, 1082, 1083, 1072, 1074, 1080, 1096, 1077, 32, 66, 58, 32, 91, 32, 1042, 1067, 1050, 1051, 32, 93))
+end
+end)
+_0x0013._0x005a:_0x0055(function(_0x005b, _0x0154)
+if _0x0154 then return end
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x01cd then
+if not _0x01ce then
+return
+end
+if _0x01cf then
+print(string.char(91, 33, 93, 32, 66, 108, 105, 110, 107, 32, 1085, 1072, 32, 1087, 1077, 1088, 1077, 1079, 1072, 1088, 1103, 1076, 1082, 1077, 33, 32, 1055, 1086, 1076, 1086, 1078, 1076, 1080, 32, 49, 53, 32, 1089, 1077, 1082, 1091, 1085, 1076, 46))
+return
+end
+local char = _0x0006._0x00a0
+if not char then return end
+local _0x01d4 = char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if not _0x01d4 then return end
+_0x01cf = true
+print(string.char(91, 43, 93, 32, 66, 76, 73, 78, 75, 32, 1057, 1054, 1042, 1045, 1056, 1064, 1045, 1053, 33))
+local _0x01d5 = _0x0015._0x0018
+local _0x01d6 = _0x01d5._0x00dc._0x00f2
+local _0x01d7 = _0x00bf._0x001f(_0x01d6._0x0067, 0, _0x01d6._0x0168)._0x01d8
+_0x00c2._0x00c3(function()
+for _0x00c4 = 1, _0x01d1 do
+local _0x01d9 = _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x01d9 then
+_0x01d9._0x00dc = _0x01d9._0x00dc + (_0x01d7 * _0x01d0)
+end
+if _0x00c4 < _0x01d1 then
+_0x00c2._0x00c6(_0x01d2)
+end
+end
+print(string.char(91, 45, 93, 32, 1057, 1077, 1088, 1080, 1103, 32, 66, 108, 105, 110, 107, 32, 1079, 1072, 1074, 1077, 1088, 1096, 1077, 1085, 1072, 46, 32, 1050, 1091, 1083, 1076, 1072, 1091, 1085, 32, 49, 53, 32, 1089, 1077, 1082, 46))
+end)
+_0x00c2._0x0193(_0x01d3, function()
+_0x01cf = false
+print(string.char(91, 10004, 93, 32, 66, 108, 105, 110, 107, 32, 1089, 1085, 1086, 1074, 1072, 32, 1075, 1086, 1090, 1086, 1074, 33))
+end)
+end
+end)
+local _0x01d0 = 5
+local _0x01d1 = 3
+local _0x01d2 = 0.12
+_0x0089(_0x0084, string.char(9889, 32, 66, 108, 105, 110, 107, 32, 40, 1041, 1077, 1079, 32, 1050, 1091, 1083, 1076, 1072, 1091, 1085, 1072, 41), function(_0x008e)
+if _0x008e then
+local char = _0x0006._0x00a0
+if char then
+local _0x01d4 = char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x01d4 then
+local _0x01d5 = _0x0015._0x0018
+local _0x01d6 = _0x01d5._0x00dc._0x00f2
+local _0x01d7 = _0x00bf._0x001f(_0x01d6._0x0067, 0, _0x01d6._0x0168)._0x01d8
+_0x00c2._0x00c3(function()
+for _0x00c4 = 1, _0x01d1 do
+local _0x01d9 = _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x01d9 then
+_0x01d9._0x00dc = _0x01d9._0x00dc + (_0x01d7 * _0x01d0)
+end
+if _0x00c4 < _0x01d1 then
+_0x00c2._0x00c6(_0x01d2)
+end
+end
+end)
+end
+end
+_0x00c2._0x0193(0.2, function()
+end)
+end
+end)
+local _0x0005 = _0x0004:_0x0012(string.char(80, 108, 97, 121, 101, 114, 115))
+local _0x0014 = _0x0004:_0x0012(string.char(82, 117, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x0006 = _0x0005._0x0006
+local _0x01df = false
+local _0x01e0 = nil
+local _0x01e1 = _0x0015._0x0018._0x01e2
+_0x0089(_0x0086, string.char(55356, 57250, 32, 68, 111, 119, 110, 104, 105, 108, 108, 32, 73, 109, 109, 101, 114, 115, 105, 111, 110, 32, 40, 1044, 1083, 1103, 32, 1075, 1086, 1088, 1086, 1082, 41), function(_0x008e)
+_0x01df = _0x008e
+local _0x01d5 = _0x0015._0x0018
+if _0x008e then
+print(string.char(91, 43, 93, 32, 68, 111, 119, 110, 104, 105, 108, 108, 32, 73, 109, 109, 101, 114, 115, 105, 111, 110, 58, 32, 91, 32, 1042, 1050, 1051, 32, 93, 32, 40, 1051, 1086, 1074, 1080, 1084, 32, 1072, 1076, 1088, 1077, 1085, 1072, 1083, 1080, 1085, 32, 1085, 1072, 32, 1075, 1086, 1088, 1082, 1072, 1093, 41))
+_0x01d5._0x01e2 = 85
+local char = _0x0006._0x00a0
+if char then
+local _0x00ba = char:_0x0019(string.char(72, 101, 97, 100))
+if _0x00ba then
+_0x00ba._0x01e4 = 1
+end
+end
+local _0x01e5 = _0x01d5._0x00dc
+_0x01e0 = _0x0014._0x00a5:_0x0055(function(_0x01e6)
+local _0x012f = _0x0006._0x00a0
+if not _0x012f then return end
+local _0x01d4 = _0x012f:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100, 82, 111, 111, 116, 80, 97, 114, 116))
+if _0x01d4 then
+local _0x01e7 = _0x01d4._0x00ed
+local _0x01e8 = _0x00bf._0x001f(_0x01e7._0x0067, 0, _0x01e7._0x0168)._0x00d6
+local _0x01e9 = 85 + math._0x006c(_0x01e8 * 0.15, 0, 20)
+_0x01d5._0x01e2 = _0x01d5._0x01e2 + (_0x01e9 - _0x01d5._0x01e2) * (_0x01e6 * 5)
+local _0x01d6 = _0x01d5._0x00dc._0x00f2
+local _0x01ea = _0x01d5._0x00dc._0x00f5
+local _0x01eb = _0x01ea:_0x01ec(_0x01e7)
+local _0x01ed = math._0x006c(-_0x01eb * 0.003, -0.15, 0.15)
+local _0x01ee = 0
+local _0x01ef = 0
+if _0x01e8 > 35 then
+local _0x01f0 = (_0x01e8 - 35) * 0.0004
+_0x01ee = (math.random() - 0.5) * _0x01f0
+_0x01ef = (math.random() - 0.5) * _0x01f0
+end
+end
+end)
+else
+print(string.char(91, 45, 93, 32, 68, 111, 119, 110, 104, 105, 108, 108, 32, 73, 109, 109, 101, 114, 115, 105, 111, 110, 58, 32, 91, 32, 1042, 1067, 1050, 1051, 32, 93))
+_0x01d5._0x01e2 = _0x01e1
+if _0x01e0 then
+_0x01e0:_0x017c()
+_0x01e0 = nil
+end
+local char = _0x0006._0x00a0
+if char then
+local _0x00ba = char:_0x0019(string.char(72, 101, 97, 100))
+if _0x00ba then
+_0x00ba._0x01e4 = 0
+end
+end
+end
+end)
+_0x0091(_0x0086, string.char(55357, 56589, 32, 70, 79, 86, 32, 67, 104, 97, 110, 103, 101, 114), 15, 120, _0x0015._0x0018._0x01e2, function(_0x009c)
+local _0x01d5 = _0x0015._0x0018
+if _0x01d5 then
+_0x01d5._0x01e2 = _0x009c
+end
+end)
+_0x008f(_0x0086, string.char(55357, 56580, 32, 82, 101, 115, 101, 116, 32, 70, 79, 86, 32, 40, 55, 48, 41), function()
+local _0x01d5 = _0x0015._0x0018
+if _0x01d5 then
+_0x01d5._0x01e2 = 70
+print(string.char(91, 43, 93, 32, 70, 79, 86, 32, 1089, 1073, 1088, 1086, 1096, 1077, 1085, 32, 1076, 1086, 32, 1073, 1072, 1079, 1086, 1074, 1086, 1075, 1086, 58, 32, 55, 48))
+end
+end)
+local _0x0013 = _0x0004:_0x0012(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
+local _0x0017 = _0x0015._0x0018
+local _0x01f9 = false
+local _0x01fa = false
+local _0x01fb = 70
+_0x0089(_0x0086, string.char(55356, 57263, 32, 70, 97, 115, 116, 32, 90, 111, 111, 109, 32, 111, 110, 32, 67), function(_0x008e)
+_0x01f9 = _0x008e
+if _0x008e then
+print(string.char(91, 43, 93, 32, 70, 97, 115, 116, 32, 90, 111, 111, 109, 32, 40, 67, 41, 58, 32, 91, 32, 1042, 1050, 1051, 32, 93))
+else
+print(string.char(91, 45, 93, 32, 70, 97, 115, 116, 32, 90, 111, 111, 109, 32, 40, 67, 41, 58, 32, 91, 32, 1042, 1067, 1050, 1051, 32, 93))
+if _0x01fa then
+_0x01fa = false
+_0x0017._0x01e2 = _0x01fb
+end
+end
+end)
+_0x0013._0x005a:_0x0055(function(_0x005b, _0x0154)
+if not _0x01f9 or _0x0154 then return end
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x01fc then
+local _0x01d5 = _0x0015._0x0018
+if _0x01d5 then
+_0x01fb = _0x01d5._0x01e2
+_0x0017._0x01e2 = 30
+_0x01fa = true
+end
+end
+end)
+_0x0013._0x0063:_0x0055(function(_0x005b, _0x0154)
+if not _0x01f9 then return end
+if _0x005b._0x00e3 == _0x0023._0x00e3._0x01fc and _0x01fa then
+local _0x01d5 = _0x0015._0x0018
+if _0x01d5 then
+_0x0017._0x01e2 = _0x01fb
+_0x01fa = false
+end
+end
+end)
+local _0x01bb = 1
+local _0x01bc = nil
+_0x008f(_0x0082, string.char(55356, 57263, 32, 1062, 1077, 1083, 1100, 58, 32, 91, 32, 1053, 1072, 1078, 1084, 1080, 32, 1076, 1083, 1103, 32, 1074, 1099, 1073, 1086, 1088, 1072, 32, 93), function()
+local _0x01bd = {}
+for _0x0008, _0x009f in pairs(_0x0005:_0x00a6()) do
+if _0x009f ~= _0x0006 then
+table.insert(_0x01bd, _0x009f)
+end
+end
+if #_0x01bd == 0 then
+print(string.char(91, 45, 93, 32, 1053, 1072, 32, 1089, 1077, 1088, 1074, 1077, 1088, 1077, 32, 1073, 1086, 1083, 1100, 1096, 1077, 32, 1085, 1080, 1082, 1086, 1075, 1086, 32, 1085, 1077, 1090, 33))
+return
+end
+_0x01bb = _0x01bb + 1
+if _0x01bb > #_0x01bd then
+_0x01bb = 1
+end
+_0x01bc = _0x01bd[_0x01bb]
+print(string.char(91, 55356, 57263, 32, 1058, 1040, 1056, 1043, 1045, 1058, 32, 1042, 1067, 1041, 1056, 1040, 1053, 93, 58, 32) .. _0x01bc._0x0020 .. string.char(32, 40) .. _0x01bc._0x01be .. string.char(41))
+end)
+_0x008f(_0x0082, string.char(55357, 56384, 32, 86, 105, 101, 119, 32, 40, 1057, 1083, 1077, 1076, 1080, 1090, 1100, 32, 1079, 1072, 32, 1094, 1077, 1083, 1100, 1102, 41), function()
+if not _0x01bc or not _0x01bc._0x0021 then
+print(string.char(91, 45, 93, 32, 1057, 1085, 1072, 1095, 1072, 1083, 1072, 32, 1074, 1099, 1073, 1077, 1088, 1080, 32, 1094, 1077, 1083, 1100, 32, 1082, 1085, 1086, 1087, 1082, 1086, 1081, 32, 1074, 1099, 1096, 1077, 33))
+return
+end
+local char = _0x01bc._0x00a0
+local _0x0162 = char and char:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100))
+if _0x0162 then
+_0x0015._0x0018._0x011c = _0x0162
+print(string.char(91, 43, 93, 32, 1056, 1077, 1078, 1080, 1084, 32, 1085, 1072, 1073, 1083, 1102, 1076, 1077, 1085, 1080, 1103, 32, 1079, 1072, 58, 32) .. _0x01bc._0x0020)
+else
+print(string.char(91, 45, 93, 32, 1059, 32, 1094, 1077, 1083, 1080, 32, 1085, 1077, 1090, 32, 1087, 1077, 1088, 1089, 1086, 1085, 1072, 1078, 1072, 32, 1080, 1083, 1080, 32, 1075, 1091, 1084, 1072, 1085, 1086, 1080, 1076, 1072, 33))
+end
+end)
+local _0x0200 = _0x0004:_0x0012(string.char(84, 101, 108, 101, 112, 111, 114, 116, 83, 101, 114, 118, 105, 99, 101))
+_0x008f(_0x0088, string.char(55357, 56580, 32, 82, 101, 106, 111, 105, 110, 32, 83, 101, 114, 118, 101, 114, 32, 40, 1055, 1077, 1088, 1077, 1079, 1072, 1093, 1086, 1076, 41), function()
+print(string.char(91, 43, 93, 32, 1055, 1077, 1088, 1077, 1087, 1086, 1076, 1082, 1083, 1102, 1095, 1077, 1085, 1080, 1077, 32, 1082, 32, 1089, 1077, 1088, 1074, 1077, 1088, 1091, 46, 46, 46))
+if #_0x0005:_0x00a6() <= 1 then
+_0x0006:_0x000a(string.char(10, 91, 82, 111, 108, 105, 99, 99, 114, 111, 108, 105, 99, 32, 72, 117, 98, 93, 32, 1055, 1077, 1088, 1077, 1079, 1072, 1093, 1086, 1076, 46, 46, 46))
+_0x00c2._0x00c6(1)
+_0x0200:_0x0203(_0x0004._0x0204, _0x0006)
+else
+_0x0200:_0x0205(_0x0004._0x0204, _0x0004._0x0206, _0x0006)
+end
+end)
+_0x008f(_0x0088, string.char(55357, 56421, 32, 1054, 1085, 1083, 1072, 1081, 1085, 32, 1085, 1072, 32, 1089, 1077, 1088, 1074, 1077, 1088, 1077, 58, 32, 91, 32, 1054, 1073, 1085, 1086, 1074, 1080, 1090, 1100, 32, 93), function(_0x0207)
+local _0x0208 = #_0x0005:_0x00a6()
+local _0x0209 = _0x0005._0x020a
+print(string.char(91, 55357, 56522, 32, 1057, 1058, 1040, 1058, 1048, 1057, 1058, 1048, 1050, 1040, 93, 58, 32, 1048, 1075, 1088, 1086, 1082, 1086, 1074, 32, 1074, 32, 1089, 1077, 1089, 1089, 1080, 1080, 58, 32) .. _0x0208 .. string.char(32, 47, 32) .. _0x0209)
+end)
+local _0x0014 = _0x0004:_0x0012(string.char(82, 117, 110, 83, 101, 114, 118, 105, 99, 101))
+local _0x0013 = _0x0004:_0x0012(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
+local _0x0015 = _0x0004:_0x0012(string.char(87, 111, 114, 107, 115, 112, 97, 99, 101))
+local _0x020d = false
+local _0x020e
+local _0x020f = 0
+local _0x0210 = 0
+local _0x0211 = _0x00bf._0x001f()
+_0x0089(_0x0086, string.char(55357, 56567, 32, 70, 114, 101, 101, 99, 97, 109, 32, 40, 1057, 1074, 1086, 1073, 1086, 1076, 1085, 1072, 1103, 32, 1082, 1072, 1084, 1077, 1088, 1072, 41), function(_0x008e)
+_0x020d = _0x008e
+local _0x01d5 = _0x0015._0x0018
+if _0x008e then
+_0x0211 = _0x01d5._0x00dc._0x002a
+_0x01d5._0x0212 = _0x0023._0x0212._0x0213
+_0x020e = _0x0014._0x00a5:_0x0055(function(_0x01e6)
+local _0x0214 = _0x00bf._0x001f()
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f1) then _0x0214 = _0x0214 + _0x00bf._0x001f(0, 0, -1) end
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f3) then _0x0214 = _0x0214 + _0x00bf._0x001f(0, 0, 1) end
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f4) then _0x0214 = _0x0214 + _0x00bf._0x001f(-1, 0, 0) end
+if _0x0013:_0x00f0(_0x0023._0x00e3._0x00f6) then _0x0214 = _0x0214 + _0x00bf._0x001f(1, 0, 0) end
+_0x0211 = _0x0211 + (_0x01d5._0x00dc:_0x0215(_0x0214) * (_0x01e6 * 50))
+_0x01d5._0x00dc = _0x00dc._0x001f(_0x0211) * _0x01d5._0x00dc - _0x01d5._0x00dc._0x002a
+end)
+print(string.char(91, 43, 93, 32, 70, 114, 101, 101, 99, 97, 109, 32, 1042, 1050, 1051, 1070, 1063, 1045, 1053, 32, 40, 1059, 1087, 1088, 1072, 1074, 1083, 1077, 1085, 1080, 1077, 58, 32, 87, 44, 32, 65, 44, 32, 83, 44, 32, 68, 41))
+else
+if _0x020e then _0x020e:_0x017c() end
+_0x01d5._0x0212 = _0x0023._0x0212._0x0216
+if _0x0006._0x00a0 and _0x0006._0x00a0:_0x0019(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
+_0x01d5._0x011c = _0x0006._0x00a0._0x00ce
+end
+print(string.char(91, 45, 93, 32, 70, 114, 101, 101, 99, 97, 109, 32, 1042, 1067, 1050, 1051, 1070, 1063, 1045, 1053))
+end
+end)
+_0x0091(_0x0086, string.char(55358, 56976, 32, 1043, 1088, 1072, 1074, 1080, 1090, 1072, 1094, 1080, 1103, 32, 1084, 1080, 1088, 1072), 0, 300, _0x0015._0x0217, function(_0x009c)
+_0x0015._0x0217 = _0x009c
+print(string.char(91, 43, 93, 32, 1043, 1088, 1072, 1074, 1080, 1090, 1072, 1094, 1080, 1103, 32, 1080, 1079, 1084, 1077, 1085, 1077, 1085, 1072, 32, 1085, 1072, 58, 32) .. _0x009c)
 end)
